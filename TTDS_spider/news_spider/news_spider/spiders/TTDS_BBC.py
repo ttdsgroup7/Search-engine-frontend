@@ -37,6 +37,7 @@ class TtdsBbcSpider(scrapy.Spider):
                   'https://www.bbc.co.uk/news/world/middle_east', 'https://www.bbc.co.uk/news/world/us_and_canada',
                   'https://www.bbc.co.uk/news/technology', 'https://www.bbc.co.uk/news/health',
                   'https://www.bbc.co.uk/news/education', 'https://www.bbc.co.uk/news/entertainment_and_arts']
+    # start_urls = ['https://www.bbc.co.uk/news/coronavirus']
 
     def start_requests(self):
         DEFAULT_REQUEST_HEADERS['Accept'] = '*/*'
@@ -82,7 +83,7 @@ class TtdsBbcSpider(scrapy.Spider):
             news_item['headline'] = response.meta.get("title", "")
             news_item['publish_time'] = publish_time
             news_item['content'] = content
-            news_item['tag'] = tag
+            news_item['tag'] = "https://bbc.co.uk/" + tag
             logger1.info("news_item['title']" + "was submitted")
             yield news_item
         else:

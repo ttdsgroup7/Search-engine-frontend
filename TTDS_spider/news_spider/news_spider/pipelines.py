@@ -6,11 +6,9 @@
 
 # useful for handling different item types with a single interface
 import pymysql
-# from itemadapter import ItemAdapter
-# from scrapy import Item
-
 
 class mysql_pipeline:
+
     def process_item(self, item, spider):
         self.insert_mysql(item)
         return item
@@ -23,9 +21,23 @@ class mysql_pipeline:
                                     password='!ttds2021',
                                     db='TTDS_group7',
                                     charset='utf8mb4')
-        # self.cursor = self.db.cursor(DictCursor)
         self.cursor = self.conn.cursor()
         self.ori_table = 'BBC_news'
+        # delete_sql = "DROP TABLE IF EXISTS {}".format(self.ori_table)
+        # self.cursor.execute(delete_sql)
+        # create_sql = """
+        # CREATE TABLE BBC_news (
+        #     docid INT NOT NULL AUTO_INCREMENT,
+        #     publish_date VARCHAR(255),
+        #     head_line TINYTEXT,
+        #     content TEXT,
+        #     tag VARCHAR(255),
+        #     PRIMARY KEY (docid),
+        #     UNIQUE KEY (tag)
+        # )
+        # """
+        # self.cursor.execute(create_sql)
+
 
     # Close the databases
     def close_spider(self, spider):
@@ -36,19 +48,13 @@ class mysql_pipeline:
 
     # Insert the data
     def insert_mysql(self, item):
-        sql = '''insert into {0}(Publish_date, Headline, content, Tag)  VALUES ('{1}','{2}','{3}','{4}') '''.format(self.ori_table,
-                                                                              item.get(
-                                                                                  'publish_time',
-                                                                                  ''),
-                                                                              pymysql.converters.escape_string(item.get(
-                                                                                  'headline',
-                                                                                  '')),
-                                                                              pymysql.converters.escape_string(
-                                                                                  item.get(
-                                                                                      'content',
-                                                                                      '')),
-                                                                              item.get('tag',
-                                                                                       ''))
+        sql = '''insert ignore into {0}(publish_date, head_line, content, tag)  VALUES ('{1}','{2}','{3}','{4}') '''\
+            .format(self.ori_table,
+                    item.get('publish_time',''),
+                    pymysql.converters.escape_string(item.get('headline','')),
+                    pymysql.converters.escape_string(item.get('content','')),
+                    item.get('tag','')
+                    )
         # print(sql)
         try:
             self.cursor.execute(sql)
