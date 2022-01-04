@@ -38,7 +38,9 @@ class TtdsBbcSpider(scrapy.Spider):
                   'https://www.bbc.co.uk/news/world/europe', 'https://www.bbc.co.uk/news/world/latin_america',
                   'https://www.bbc.co.uk/news/world/middle_east', 'https://www.bbc.co.uk/news/world/us_and_canada',
                   'https://www.bbc.co.uk/news/technology', 'https://www.bbc.co.uk/news/health',
-                  'https://www.bbc.co.uk/news/education', 'https://www.bbc.co.uk/news/entertainment_and_arts']
+                  'https://www.bbc.co.uk/news/education', 'https://www.bbc.co.uk/news/entertainment_and_arts',
+                  'https://www.bbc.co.uk/news/business','https://www.bbc.co.uk/news/politics',
+                  'https://www.bbc.co.uk/news/science_and_environment']
 
     # start_urls = ['https://www.bbc.co.uk/news/coronavirus']
 
