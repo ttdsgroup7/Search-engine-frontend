@@ -42,7 +42,7 @@ class TtdsBbcSpider(scrapy.Spider):
                   'https://www.bbc.co.uk/news/business','https://www.bbc.co.uk/news/politics',
                   'https://www.bbc.co.uk/news/science_and_environment']
 
-    # start_urls = ['https://www.bbc.co.uk/news/coronavirus']
+
 
     def start_requests(self):
         DEFAULT_REQUEST_HEADERS['Accept'] = '*/*'
