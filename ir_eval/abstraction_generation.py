@@ -57,7 +57,7 @@ class Abstraction_Generation():
         # facebook/bart-base 2.1GB
         # distilbart-xsum-12-1 400MB
         # https://huggingface.co/sshleifer/distilbart-cnn-12-6 speed
-        model_name = "./distilbart-xsum-12-1"
+        model_name = "./distilbart-cnn-12-6"
         tokenizer = BartTokenizer.from_pretrained(model_name)
         # forced_bos_token_id =0 disable support for multilingual models
         model = BartForConditionalGeneration.from_pretrained(model_name, forced_bos_token_id=0).to(self.device)
