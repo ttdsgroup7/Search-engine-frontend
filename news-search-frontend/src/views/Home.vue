@@ -1,19 +1,33 @@
 <template>
   <v-container>
-    <search-component></search-component>
+    <WorldMapVue
+        @click="onClickMapCountry"
+    >
+      <template v-slot:overlay>
+        // -> Your components here
+      </template>
+    </WorldMapVue>
   </v-container>
 </template>
 
 <script>
-  import searchComponent from "@/views/searchComponent";
-  import HelloWorld from "@/components/HelloWorld";
+import Countries from "../utili/countries.js";
 
-  export default {
-    name: 'Home',
+export default {
+  name: 'Home',
 
-    components: {
-      searchComponent,
-      HelloWorld
+  data: () => ({
+    showMapOverlay: false,
+    country: Countries
+
+  }),
+  methods: {
+    onMouseLeaveMapCountry() {
+      this.showMapOverlay = false
+    },
+    onClickMapCountry(data) {
+      console.log('Click Country', data)
     },
   }
+}
 </script>

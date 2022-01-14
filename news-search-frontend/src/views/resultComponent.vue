@@ -1,13 +1,41 @@
 <template>
-  <v-main id="inspire">
-    <v-toolbar color="orange accent-1" >
+  <div>
+    <v-navigation-drawer
+        v-model="drawer"
+        app
+    >
+      <v-list
+          nav
+          dense
+      >
+        <v-list-item-group
+            v-model="group"
+            active-class="deep-purple--text text--accent-4"
+        >
+          <v-list-item @click="toHome">
+            <v-list-item-icon>
+              <v-icon>mdi-home</v-icon>
+            </v-list-item-icon>
+            <v-list-item-title>Home</v-list-item-title>
+          </v-list-item>
+
+          <v-list-item>
+            <v-list-item-icon>
+              <v-icon>mdi-account</v-icon>
+            </v-list-item-icon>
+            <v-list-item-title>Account</v-list-item-title>
+          </v-list-item>
+        </v-list-item-group>
+      </v-list>
+    </v-navigation-drawer>
+    <v-app-bar color="orange accent-1" app>
       <v-app-bar-nav-icon class="hidden-sm-and-down" @click="drawer = !drawer"></v-app-bar-nav-icon>
       <v-toolbar-title class="text-h6 mr-6 hidden-sm-and-down">
-        News search
+        <span @click="toHome">News search</span>
       </v-toolbar-title>
       <v-autocomplete
           v-model="model"
-          :items="items"
+          :items="items_test"
           :loading="isLoading"
           :search-input.sync="search"
           chips
@@ -19,6 +47,7 @@
           label="Search for a news..."
           solo
       >
+
         <template v-slot:no-data>
           <v-list-item>
             <v-list-item-title>
@@ -35,102 +64,161 @@
               class="white--text"
               v-on="on"
           >
-            <v-icon left>
-              mdi-bitcoin
-            </v-icon>
-            <span v-text="item.name"></span>
+            <span v-text="item.head_line"></span>
           </v-chip>
         </template>
         <template v-slot:item="{ item }">
-          <v-list-item-avatar
-              color="indigo"
-              class="text-h5 font-weight-light white--text"
-          >
-            {{ item.name.charAt(0) }}
-          </v-list-item-avatar>
           <v-list-item-content>
-            <v-list-item-title v-text="item.name"></v-list-item-title>
-            <v-list-item-subtitle v-text="item.symbol"></v-list-item-subtitle>
+            <v-list-item-title v-text="item.head_line"></v-list-item-title>
+            <v-list-item-subtitle v-text="timestampConvert(item.publish_date)"></v-list-item-subtitle>
           </v-list-item-content>
-          <v-list-item-action>
-            <v-icon>mdi-bitcoin</v-icon>
-          </v-list-item-action>
         </template>
       </v-autocomplete>
       <template v-slot:extension>
         <v-tabs
             v-model="tab"
-            :hide-slider="!model"
             color="blue-grey"
             slider-color="blue-grey"
         >
-          <v-tab :disabled="!model">
+          <v-tab>
             News
           </v-tab>
-          <v-tab :disabled="!model">
+          <v-tab>
             Trading
           </v-tab>
-          <v-tab :disabled="!model">
+          <v-tab>
             Blog
           </v-tab>
         </v-tabs>
+        <v-btn>
+          Tools
+        </v-btn>
       </template>
-    </v-toolbar>
-    <v-navigation-drawer
-        v-model="drawer"
-        absolute
-        temporary
-    >
+      <v-switch
+          v-model="advSearch"
+          label="Advance search"
+      ></v-switch>
 
-    </v-navigation-drawer>
-    <v-col
-      v-for="(item, index) in items"
-      :key="index"
-      cols="12"
-    >
-      <v-card
-          :color="item.color"
+      <v-btn
+          fab
+          small
 
       >
-        <div class="d-flex flex-no-wrap justify-space-between">
-          <div>
-            <v-card-title
-                class="text-h5"
-                v-text="item.head_line"
-            ></v-card-title>
+        <!--        <v-icon>-->
+        <!--          mdi-close-->
+        <!--        </v-icon>-->
+        <v-icon>
+          mdi-pencil
+        </v-icon>
+      </v-btn>
+    </v-app-bar>
 
-            <v-card-subtitle v-text="timestampConvert(item.publish_date)"></v-card-subtitle>
+    <v-container fluid>
+      <v-row no-gutters>
+        <v-col
+            cols="12"
+            sm="6"
+            md="8"
+        >
+          <h4>The search time: xxxxx s</h4>
+          <v-card>
 
-            <v-card-actions>
-              <v-btn
+          </v-card>
+          <v-col
+              v-for="(item, index) in analyseListItem"
+              :key="index"
+              cols="12"
 
-                  class="ml-2 mt-5"
-                  outlined
-                  rounded
-                  small
-                  :href="item.tag"
-              >
-                Read More
-              </v-btn>
-            </v-card-actions>
-          </div>
-
-          <v-avatar
-              class="ma-3"
-              size="125"
-              tile
           >
-            <v-img :src="item.src"></v-img>
-          </v-avatar>
-        </div>
-      </v-card>
-    </v-col>
+            <v-card
+                :color="item.color"
 
-  </v-main>
+            >
+              <div class="d-flex flex-no-wrap justify-space-between">
+                <div>
+                  <v-card-title
+                      class="text-h5"
+                      v-text="item.head_line"
+                  ></v-card-title>
+
+                  <v-card-subtitle v-text="timestampConvert(item.publish_date)"></v-card-subtitle>
+                  <v-card-text>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris et condimentum nibh, in iaculis
+                    velit. Praesent at urna dolor. Praesent tempor facilisis erat non aliquet. Nulla eu magna egestas
+                    ante commodo tempus sit amet feugiat nibh. Nunc porttitor mauris id turpis tempus, sit amet interdum
+                    risus placerat.
+                  </v-card-text>
+                  <v-card-actions>
+                    <v-btn
+
+                        class="ml-2 mt-5"
+                        outlined
+                        rounded
+                        small
+                        :href="item.tag"
+                    >
+                      Read More
+                    </v-btn>
+                  </v-card-actions>
+                </div>
+
+                <v-avatar
+                    class="ma-3"
+                    size="210"
+                    tile
+                >
+                  <v-img :src="src"></v-img>
+                </v-avatar>
+              </div>
+            </v-card>
+          </v-col>
+        </v-col>
+
+        <v-col
+            cols="6"
+            md="4"
+        >
+          <h1 class="ma-4">
+            Related reading
+          </h1>
+          <v-list two-line>
+            <v-list-item-group
+                v-model="selected"
+                active-class="yellow--text"
+                multiple
+            >
+              <template v-for="(item, index) in items_test">
+                <v-list-item :key="item.head_line" :href="item.tag">
+                  <template v-slot:default>
+                    <v-list-item-content>
+                      <v-list-item-title v-text="item.head_line"></v-list-item-title>
+
+                      <v-list-item-subtitle
+                          class="text--primary"
+                          v-text="item.head_line"
+                      ></v-list-item-subtitle>
+
+                      <v-list-item-subtitle v-text="item.publish_date"></v-list-item-subtitle>
+                    </v-list-item-content>
+                  </template>
+                </v-list-item>
+
+                <v-divider
+                    v-if="index < items.length - 1"
+                    :key="index"
+                ></v-divider>
+              </template>
+            </v-list-item-group>
+          </v-list>
+        </v-col>
+      </v-row>
+    </v-container>
+  </div>
 </template>
 
 <script>
-import  axios from "axios";
+import axios from "axios";
+
 export default {
   name: "resultComponent",
   data: () => ({
@@ -141,44 +229,75 @@ export default {
       'Updates',
     ],
     isLoading: false,
-    items_test: [{"publish_date":"2022-01-02T10:56:53.000Z","head_line":"Vaccination centre relocates to new site","tag":"https://bbc.co.uk/news/uk-england-cumbria-59852247"},{"publish_date":"2022-01-01T12:04:40.000Z","head_line":"Muted celebrations as Hogmanay curtailed by Covid","tag":"https://bbc.co.uk/news/uk-scotland-59846640"},{"publish_date":"2022-01-01T13:17:27.000Z","head_line":"Pubs 'exceptionally quiet' as Wales marks new year","tag":"https://bbc.co.uk/news/uk-wales-59846561"},{"publish_date":"2022-01-01T15:00:19.000Z","head_line":"Fireworks mark subdued UK new year","tag":"https://bbc.co.uk/news/uk-59844031"},{"publish_date":"2022-01-01T16:17:08.000Z","head_line":"Antarctic station hit by Covid-19 outbreak","tag":"https://bbc.co.uk/news/world-europe-59848160"}],
-    items:[],
+    items_test: [{
+      "publish_date": "2022-01-02T10:56:53.000Z",
+      "head_line": "Vaccination centre relocates to new site",
+      "tag": "https://bbc.co.uk/news/uk-england-cumbria-59852247",
+      "type": "news"
+    }, {
+      "publish_date": "2022-01-01T12:04:40.000Z",
+      "head_line": "Muted celebrations as Hogmanay curtailed by Covid",
+      "tag": "https://bbc.co.uk/news/uk-scotland-59846640",
+      "type": "news"
+    }, {
+      "publish_date": "2022-01-01T13:17:27.000Z",
+      "head_line": "Pubs 'exceptionally quiet' as Wales marks new year",
+      "tag": "https://bbc.co.uk/news/uk-wales-59846561",
+      "type": "news"
+    }, {
+      "publish_date": "2022-01-01T15:00:19.000Z",
+      "head_line": "Fireworks mark subdued UK new year",
+      "tag": "https://bbc.co.uk/news/uk-59844031",
+      "type": "news"
+    }, {
+      "publish_date": "2022-01-01T16:17:08.000Z",
+      "head_line": "Antarctic station hit by Covid-19 outbreak",
+      "tag": "https://bbc.co.uk/news/world-europe-59848160",
+      "type": "blog"
+    }],
+    items: [],
+    src: 'https://cdn.vuetifyjs.com/images/cards/halcyon.png',
     model: null,
     search: null,
-    tab: null,
-    drawer: false
+    tab: 0,
+    drawer: false,
+    advSearch: false,
+    group: null,
+    today: ''
   }),
-  watch:{
-    model (val) {
-      if (val != null) this.tab = 0
-      else this.tab = null
-    },
-    search(term){
-      if (this.items.length < 0 || this.items.length == null){
+  created() {
+    console.log(this.$route.query.search_phase);
+    this.model = this.$route.query.search_phase;
+    this.getQuerySet(this.model);
+  },
+  computed: {
+    analyseListItem() {
+      let new_list = [];
+      if (this.tab === 0){
+        new_list = this.items_test.filter(i => i.type === 'news');
+      } else if (this.tab === 1){
+        // let today = new Date().toJSON().slice(0,10).replace(/-/g,'/');
+        new_list = this.items_test.filter(i => this.timestampConvert(i.publish_date) === '01/01/2022');
+      } else {
+        new_list = this.items_test.filter(i => i.type === 'blog');
+      }
+      return new_list
+    }
+  },
+  watch: {
+    search(term) {
+      if (this.items.length < 0 || this.items.length == null) {
         this.items = []
         return
       }
 
       this.isLoading = true
 
-      axios
-          .get(`http://gc.caohongchuan.top:8080/search/querynews?query=${term}`)
-          .then((response)=>{
-            console.log(response.data)
-            this.items = response.data['newsarray']
-          })
-          .catch((err)=>{
-            console.error(err)
-            this.items = []
-            return
-          })
-          .finally(() =>{
-            this.isLoading = false;
-          })
+      this.getQuerySet(term);
     }
   },
-  methods:{
-    timestampConvert(timeStamp){
+  methods: {
+    timestampConvert(timeStamp) {
       let date = new Date(timeStamp);
       let year = date.getFullYear();
       let month = date.getMonth();
@@ -190,8 +309,26 @@ export default {
         month += 1;
         month = '0' + month;
       }
-      return day + '/' + month +'/' + year
+      return day + '/' + month + '/' + year
     },
+    getQuerySet(term) {
+      axios
+          .get(`http://gc.caohongchuan.top:8080/search/querynews?query=${term}`)
+          .then((response) => {
+            console.log(response.data)
+            this.items = response.data['newsarray']
+          })
+          .catch((err) => {
+            console.error(err)
+            this.items = []
+          })
+          .finally(() => {
+            this.isLoading = false;
+          })
+    },
+    toHome() {
+      this.$router.push('/');
+    }
   }
 }
 </script>

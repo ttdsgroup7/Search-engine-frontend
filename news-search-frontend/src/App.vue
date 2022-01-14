@@ -3,6 +3,9 @@
     <v-main>
       <router-view/>
     </v-main>
+    <v-footer app>
+      © 2020 UOE TTDS GROUP WORK NEWS SEARCH.  All rights reserved
+    </v-footer>
   </v-app>
 </template>
 

@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import resultComponent from "@/views/resultComponent";
 import searchComponent from "@/views/searchComponent";
+import Home from "@/views/Home";
 
 Vue.use(VueRouter)
 
@@ -15,6 +16,11 @@ const routes = [
     path: '/search',
     name: 'result',
     component: resultComponent
+  },
+  {
+    path: '/home',
+    name: 'map',
+    component: Home
   }
 ]
 

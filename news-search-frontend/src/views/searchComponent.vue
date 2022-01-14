@@ -15,24 +15,37 @@
             offset-md="3"
             :align-self="alignment"
             :align="alignment">
-          <v-autocomplete
+          <v-text-field
+              v-model="model"
+              chips
               clearable
-              rounded
+              item-text="name"
+              item-value="symbol"
+              label="Search for a news..."
               solo
-              v-model="searchText"
-          ></v-autocomplete>
+          ></v-text-field>
         </v-col>
         <v-col
-            cols="6"
-            offset-md="3"
+            cols="12"
             :align-self="alignment"
             :align="alignment">
           <v-btn
-              elevation="2"
-              plain
-              raised
               @click="searchTerm"
-          > Search</v-btn>
+              class="ma-4"
+
+              raised
+          >
+            Search
+          </v-btn>
+
+          <v-btn
+              @click="searchTerm"
+              class="ma-4"
+
+              raised
+          >
+            Check the map!
+          </v-btn>
         </v-col>
       </v-row>
     </v-container>
@@ -44,11 +57,12 @@ export default {
   name: "searchComponent",
   data: () =>({
     alignment: 'center',
-    searchText:''
+    model: null,
   }),
   methods:{
     searchTerm(){
-      this.$router.push({name:'result', query:{search_phase: this.searchText}})
+      console.log(this.model);
+      this.$router.push({path:'/search', query:{search_phase: this.model}});
     }
   }
 }
