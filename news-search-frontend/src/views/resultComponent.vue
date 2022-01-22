@@ -217,7 +217,7 @@
 </template>
 
 <script>
-import axios from "axios";
+import {getSearch} from "@/api";
 
 export default {
   name: "resultComponent",
@@ -312,8 +312,7 @@ export default {
       return day + '/' + month + '/' + year
     },
     getQuerySet(term) {
-      axios
-          .get(`http://gc.caohongchuan.top:8080/search/querynews?query=${term}`)
+      getSearch(term)
           .then((response) => {
             console.log(response.data)
             this.items = response.data['newsarray']
