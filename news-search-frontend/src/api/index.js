@@ -5,7 +5,7 @@ let host_2 = 'http://gc.caohongchuan.top:7788/';
 export const getSearch = (params) => {
     return axios.get(host_1 +`search/querynews?query=${params}`)
 }
-export const getNews = () => {
+export const getRecords = () => {
     return axios.put(host_1 +`search/viewrecord`)
 }
 

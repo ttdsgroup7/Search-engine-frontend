@@ -104,19 +104,81 @@
             class="ma-2"
             :items="drop_one"
             label="Time"
-        ></v-select><v-select
-          class="ma-2"
-          :items="drop_one"
-          label="Precise Searching"
-      ></v-select>
+        ></v-select>
+        <v-select
+            class="ma-2"
+            :items="drop_one"
+            label="Precise Searching"
+        ></v-select>
       </v-toolbar>
     </div>
   </div>
 </template>
 
 <script>
+import {getSearch} from "@/api";
+
 export default {
-  name: "HeaderComponent"
+  name: "HeaderComponent",
+  data: () => ({
+    drawer: false,
+    group: null,
+    items: [],
+    isLoading: false,
+    model: null,
+    search: null,
+    tab: 0,
+    isAdvanceSearch: false,
+    drop_one: [
+      {text: 'All', value: 'all'},
+      {text: 'News', value: 'news'},
+      {text: 'Trading', value: 'trading'},
+      {text: 'Blog', value: 'blog'},
+    ],
+  }),
+  watch: {
+    async search(term) {
+      if (this.items.length < 0 || this.items.length == null) {
+        console.log(term);
+        this.items = [];
+        return
+      }
+
+      this.isLoading = true;
+      console.log(term);
+      term = term.toLowerCase();
+
+      await this.getQuerySet(term);
+    }
+  },
+  async created() {
+    console.log(this.$route.query.search_phase);
+    await this.getQuerySet(this.$route.query.search_phase);
+  },
+  methods: {
+    getQuerySet(term) {
+      getSearch(term)
+          .then((response) => {
+            // console.log(response.data.data);
+            this.items = response.data.data['newsarray'];
+            this.$emit('update:items', this.items);
+            this.totalPages = Math.ceil(this.items.length / this.PageSize);
+            this.$route.query.search_phase = term;
+            // console.log(this.items);
+            // console.log(this.items[0]);
+          })
+          .catch((err) => {
+            console.error(err);
+            this.items = [];
+          })
+          .finally(() => {
+            this.isLoading = false;
+          })
+    },
+    toHome() {
+      this.$router.push('/');
+    }
+  }
 }
 </script>
 

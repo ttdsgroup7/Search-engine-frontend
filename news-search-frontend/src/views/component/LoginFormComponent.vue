@@ -13,19 +13,7 @@
     ></v-text-field>
 
     <v-text-field
-        v-model="email"
-        :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
-        :type="show2 ? 'text' : 'password'"
-        name="input-10-2"
-        label="Visible"
-        hint="At least 8 characters"
-        value="12345678"
-        class="input-group--focused"
-        @click:append="show2 = !show2"
-    ></v-text-field>
-
-    <v-text-field
-        v-model="email"
+        v-model="password"
         :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
         :type="show2 ? 'text' : 'password'"
         name="input-10-2"
@@ -66,6 +54,7 @@
 </template>
 
 <script>
+import {register} from "@/api";
 export default {
   name: "LoginFormComponent",
   data: () => ({
@@ -76,7 +65,7 @@ export default {
       v => !!v || 'Name is required',
       v => (v && v.length <= 10) || 'Name must be less than 10 characters',
     ],
-    email: '',
+    password: '',
     emailRules: [
       v => !!v || 'E-mail is required',
       v => /.+@.+\..+/.test(v) || 'E-mail must be valid',
@@ -93,11 +82,18 @@ export default {
 
   methods: {
     validate() {
-      this.$refs.form.validate()
+      register({
+        password: this.password,
+        username: this.name,
+      }).then(() => {
+
+        this.$router.push('/');
+      });
     },
     reset() {
       this.$refs.form.reset()
     },
+
   },
 }
 </script>

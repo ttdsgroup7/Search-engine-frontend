@@ -1,6 +1,6 @@
 <template>
   <div>
-    <header-component></header-component>
+    <header-component @update:items="getItems"></header-component>
     <v-container fluid>
       <v-row no-gutters>
         <v-col
@@ -88,7 +88,7 @@
 </template>
 
 <script>
-import {getSearch} from "@/api";
+
 import HeaderComponent from "@/views/component/HeaderComponent";
 import RelatedReadingComponent from "@/views/component/RelatedReadingComponent";
 
@@ -99,28 +99,14 @@ export default {
     RelatedReadingComponent
   },
   data: () => ({
-    isAdvanceSearch: null,
-    drop_one:['Foo', 'Bar', 'Fizz', 'Buzz'],
     isLoading: false,
     items: [],
-    src: 'https://cdn.vuetifyjs.com/images/cards/halcyon.png',
-    model: null,
-    search: null,
-    tab: 0,
-    drawer: false,
-    advSearch: false,
-    group: null,
     today: '',
     page: 1,
     totalPages: null,
     PageSize: 10,
     ifCounty: false,
   }),
-  created() {
-    console.log(this.$route.query.search_phase);
-    this.model = this.$route.query.search_phase;
-    this.getQuerySet(this.model);
-  },
   computed: {
     // analyseListItem() {
     //   let new_list = [];
@@ -143,22 +129,13 @@ export default {
     }
   },
   watch: {
-    async search(term) {
-      if (this.items.length < 0 || this.items.length == null) {
-        console.log(term);
-        this.items = [];
-        return
-      }
 
-      this.isLoading = true;
-      console.log(term);
-      term = term.toLowerCase();
-
-      await this.getQuerySet(term);
-
-    }
   },
   methods: {
+    getItems(item) {
+      this.items = item;
+      this.totalPages = Math.ceil(this.items.length / this.PageSize);
+    },
     capitalizeFirstLetter(string) {
       return string.charAt(0).toUpperCase() + string.slice(1);
     },
@@ -195,27 +172,6 @@ export default {
       }
       return day + '/' + month + '/' + year
     },
-    getQuerySet(term) {
-      getSearch(term)
-          .then((response) => {
-            // console.log(response.data.data);
-            this.items = response.data.data['newsarray'];
-            this.totalPages = Math.ceil(this.items.length / this.PageSize);
-            this.$route.query.search_phase = term;
-            // console.log(this.items);
-            // console.log(this.items[0]);
-          })
-          .catch((err) => {
-            console.error(err);
-            this.items = [];
-          })
-          .finally(() => {
-            this.isLoading = false;
-          })
-    },
-    toHome() {
-      this.$router.push('/');
-    }
   }
 }
 </script>
