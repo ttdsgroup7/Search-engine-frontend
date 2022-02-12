@@ -18,25 +18,23 @@ def connectMysql():
 
 class Abstraction_Generation():
     src_text = defaultdict(list)
-    device = 'cpu'
+    # cpu much much slower
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
     res = []
     part = 0
     # device = 'cuda' if torch.cuda.is_available() else 'cpu'
     def set_text(self, text):
         cnt = 0
         s = list(text)
+        # partition the file to avoid model out of memory
         for i in s:
-            if cnt<100:
+            if cnt<50:
                 cnt+=1
             else:
                 self.part += 1
                 cnt = 1
+            # char @ will lead to garbled char after generation
             self.src_text[self.part].append(i.replace('@', ''))
-
-
-
-
-    # device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     # xsum used to generate one sentence, ideal for title prediction
     def Pegasus(self):
@@ -57,12 +55,13 @@ class Abstraction_Generation():
         # facebook/bart-base 2.1GB
         # distilbart-xsum-12-1 400MB
         # https://huggingface.co/sshleifer/distilbart-cnn-12-6 speed
-        model_name = "./distilbart-cnn-12-6"
+        # model_name = "./distilbart-cnn-12-6"
+        model_name = "sshleifer/distilbart-cnn-12-6"
         tokenizer = BartTokenizer.from_pretrained(model_name)
         # forced_bos_token_id =0 disable support for multilingual models
         model = BartForConditionalGeneration.from_pretrained(model_name, forced_bos_token_id=0).to(self.device)
         for i in range(self.part+1):
-            print("part {} start".format(i))
+            print("part {} starts".format(i))
             batch = tokenizer(self.src_text[i], truncation=True, padding='longest', return_tensors='pt').to(self.device)
             translated = model.generate(batch['input_ids'], min_length=50, max_length=100)
             # same effect
@@ -111,15 +110,3 @@ if __name__ == '__main__':
     conn.commit()
     conn.close()
 
-    # for i in text.keys():
-    #     text[i] =
-    # print(test.Pegasus())
-    # print(test.fill_mask())
-    # conn.commit()
-    # conn.close()
-
-    # from transformers import pipeline
-    # print(time())
-    # summarizer = pipeline('summarization')
-    # print(summarizer(t,min_length=30,max_length=100))
-    # print(time())
