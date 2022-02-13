@@ -77,15 +77,15 @@ class Abstraction_Generation():
     # device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     # xsum used to generate one sentence, ideal for title prediction
-    def Pegasus(self):
-        model_name = 'google/pegasus-xsum'  # 'google/pegasus-large'
-        tokenizer = PegasusTokenizer.from_pretrained(model_name)
-        model = PegasusForConditionalGeneration.from_pretrained(model_name).to(self.device)
-        batch = tokenizer(self.src_text, truncation=True, padding='longest', return_tensors="pt").to(self.device)
-        # model.generate(batch['input_ids'],max_length=...,min_length=...)
-        # length is sum of token, not words
-        translated = model.generate(**batch, min_length=30, max_length=100)
-        return tokenizer.batch_decode(translated, skip_special_tokens=True)
+    # def Pegasus(self):
+    #     model_name = 'google/pegasus-xsum'  # 'google/pegasus-large'
+    #     tokenizer = PegasusTokenizer.from_pretrained(model_name)
+    #     model = PegasusForConditionalGeneration.from_pretrained(model_name).to(self.device)
+    #     batch = tokenizer(self.src_text, truncation=True, padding='longest', return_tensors="pt").to(self.device)
+    #     # model.generate(batch['input_ids'],max_length=...,min_length=...)
+    #     # length is sum of token, not words
+    #     translated = model.generate(**batch, min_length=30, max_length=100)
+    #     return tokenizer.batch_decode(translated, skip_special_tokens=True)
 
     # generate several sentences, ideal for abstraction
 
