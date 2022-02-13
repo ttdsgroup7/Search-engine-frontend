@@ -1,9 +1,45 @@
+# -*- coding: utf-8 -*-
+
+# import os, sys
+# from google.colab import drive
+# drive.mount('/content/mnt')
+# nb_path = '/content/notebooks'
+# os.symlink('/content/mnt/My Drive/Colab Notebooks', nb_path)
+# sys.path.insert(0, nb_path)  # or append(nb_path)
+# 
+# !nvidia-smi
+# 
+# !pip install --target=$nb_path pymysql
+# !pip install --target=$nb_path transformers
+
 import pymysql
-from transformers import PegasusForConditionalGeneration, PegasusTokenizer
 import torch
 from transformers import BartForConditionalGeneration, BartTokenizer
 from time import time
 from collections import defaultdict
+
+# Commented out IPython magic to ensure Python compatibility.
+# %cd /content/mnt/MyDrive/test/
+# 
+# !curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+# !sudo apt-get install git-lfs
+# 
+# !git lfs install
+
+#used to clear cuda cache, recover GPU RAM
+torch.cuda.empty_cache()
+# or use !nvidia-smi to find process id, and use !kill to kill it
+
+# !git clone https://huggingface.co/sshleifer/distilbart-cnn-12-6
+# !git clone https://huggingface.co/shibing624/macbert4csc-base-chinese
+
+
+
+# model_name = "sshleifer/distilbart-cnn-12-6"
+# model_name = "./distilbart-cnn-12-6"
+# tokenizer = BartTokenizer.from_pretrained(model_name)
+# model = BartForConditionalGeneration.from_pretrained(model_name, forced_bos_token_id=0).to('cuda')
+
 def connectMysql():
     connMysql = pymysql.connect(
         host='34.89.114.242',
@@ -18,23 +54,27 @@ def connectMysql():
 
 class Abstraction_Generation():
     src_text = defaultdict(list)
-    # cpu much much slower
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
     res = []
     part = 0
-    # device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
     def set_text(self, text):
         cnt = 0
         s = list(text)
-        # partition the file to avoid model out of memory
         for i in s:
-            if cnt<50:
+          # 30 lines/part costs about 12GB GPU RAM, for k80
+          # 40 for tesla t4 if use empty_cache to clear GPU memory
+          # ... for tesla t4 for a new environment(or restart)
+            if cnt<40:
                 cnt+=1
             else:
                 self.part += 1
                 cnt = 1
-            # char @ will lead to garbled char after generation
             self.src_text[self.part].append(i.replace('@', ''))
+
+
+
+
+    # device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     # xsum used to generate one sentence, ideal for title prediction
     def Pegasus(self):
@@ -55,13 +95,12 @@ class Abstraction_Generation():
         # facebook/bart-base 2.1GB
         # distilbart-xsum-12-1 400MB
         # https://huggingface.co/sshleifer/distilbart-cnn-12-6 speed
-        # model_name = "./distilbart-cnn-12-6"
-        model_name = "sshleifer/distilbart-cnn-12-6"
+        model_name = "./distilbart-cnn-12-6"
         tokenizer = BartTokenizer.from_pretrained(model_name)
         # forced_bos_token_id =0 disable support for multilingual models
         model = BartForConditionalGeneration.from_pretrained(model_name, forced_bos_token_id=0).to(self.device)
         for i in range(self.part+1):
-            print("part {} starts".format(i))
+            print("part {} start".format(i))
             batch = tokenizer(self.src_text[i], truncation=True, padding='longest', return_tensors='pt').to(self.device)
             translated = model.generate(batch['input_ids'], min_length=50, max_length=100)
             # same effect
@@ -85,10 +124,10 @@ class Abstraction_Generation():
         # return tok.batch_decode(generated_ids, skip_special_tokens=True)
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':        
     conn =connectMysql()
     cursor = conn.cursor()
-    sentence = 'select docid,content from to_push'
+    sentence = 'select id,content from news'
     cursor.execute(sentence)
     text = cursor.fetchall()
     conn.close()
@@ -99,7 +138,7 @@ if __name__ == '__main__':
     res = test.Bart()
 
     id = list(text.keys())
-    sentence = 'update to_push set abstract=(%s) where docid = (%s)'
+    sentence = 'update news set news_abstract=(%s) where id = (%s)'
     commitlist = []
     for index in range(len(text)):
         commitlist.append((res[index],id[index]))
@@ -110,3 +149,7 @@ if __name__ == '__main__':
     conn.commit()
     conn.close()
 
+
+# import gc
+# test=None
+# gc.collect()
