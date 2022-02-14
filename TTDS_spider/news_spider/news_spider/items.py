@@ -12,5 +12,9 @@ class NewsSpiderItem(scrapy.Item):
     headline = scrapy.Field()
     publish_time = scrapy.Field()
     content = scrapy.Field()
-    tag = scrapy.Field()
+    url = scrapy.Field()
+    image = scrapy.Field()
+    location = scrapy.Field()
+    related_topic = scrapy.Field()
+
     pass

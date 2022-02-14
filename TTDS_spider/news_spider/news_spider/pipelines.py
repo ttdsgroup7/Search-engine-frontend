@@ -7,6 +7,7 @@
 # useful for handling different item types with a single interface
 import pymysql
 
+
 class mysql_pipeline:
 
     def process_item(self, item, spider):
@@ -15,14 +16,15 @@ class mysql_pipeline:
 
     # connect to the databases
     def open_spider(self, spider):
-        self.conn = pymysql.connect(host='35.246.23.112',
+        self.conn = pymysql.connect(host='34.89.114.242',
                                     port=3306,
                                     user='root',
                                     password='!ttds2021',
                                     db='TTDS_group7',
                                     charset='utf8mb4')
         self.cursor = self.conn.cursor()
-        self.ori_table = 'BBC_news'
+        self.ori_table = 'news'
+
         # delete_sql = "DROP TABLE IF EXISTS {}".format(self.ori_table)
         # self.cursor.execute(delete_sql)
         # create_sql = """
@@ -38,7 +40,6 @@ class mysql_pipeline:
         # """
         # self.cursor.execute(create_sql)
 
-
     # Close the databases
     def close_spider(self, spider):
         print("Terminating" + spider.name + "spider...")
@@ -48,12 +49,15 @@ class mysql_pipeline:
 
     # Insert the data
     def insert_mysql(self, item):
-        sql = '''insert ignore into {0}(publish_date, head_line, content, tag)  VALUES ('{1}','{2}','{3}','{4}') '''\
+        sql = '''insert ignore into {0}(publish_date, head_line, content, country, image, theme, url)  VALUES ('{1}','{2}','{3}','{4}','{5}','{6}','{7}') ''' \
             .format(self.ori_table,
-                    item.get('publish_time',''),
-                    pymysql.converters.escape_string(item.get('headline','')),
-                    pymysql.converters.escape_string(item.get('content','')),
-                    item.get('tag','')
+                    item.get('publish_time'),
+                    pymysql.converters.escape_string(item.get('headline')),
+                    pymysql.converters.escape_string(item.get('content')),
+                    item.get('location'),
+                    item.get('image'),
+                    pymysql.converters.escape_string(item.get('related_topic')),
+                    item.get('url')
                     )
         # print(sql)
         try:
