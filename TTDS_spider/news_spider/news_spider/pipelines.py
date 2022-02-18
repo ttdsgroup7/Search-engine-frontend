@@ -49,21 +49,26 @@ class mysql_pipeline:
 
     # Insert the data
     def insert_mysql(self, item):
-        sql = '''insert ignore into {0}(publish_date, head_line, content, country, image, theme, url)  VALUES ('{1}','{2}','{3}','{4}','{5}','{6}','{7}') ''' \
-            .format(self.ori_table,
-                    item.get('publish_time'),
-                    pymysql.converters.escape_string(item.get('headline')),
-                    pymysql.converters.escape_string(item.get('content')),
-                    item.get('location'),
-                    item.get('image'),
-                    pymysql.converters.escape_string(item.get('related_topic')),
-                    item.get('url')
-                    )
-        # print(sql)
-        try:
-            self.cursor.execute(sql)
-            self.conn.commit()
-            print('successfully writing the data')
-        except BaseException as e:
-            print(e)
-            print("error writing sql:" + sql)
+        select_sql = '''select * from {0} where url = '{1}' '''.format(self.ori_table, item.get('url'))
+        self.cursor.execute(select_sql)
+        if not self.cursor.fetchall():
+            # print(sql)
+            try:
+                sql = '''insert ignore into {0}(publish_date, head_line, content, country, image, theme, url)  VALUES ('{1}','{2}','{3}','{4}','{5}','{6}','{7}') ''' \
+                    .format(self.ori_table,
+                            item.get('publish_time'),
+                            pymysql.converters.escape_string(item.get('headline')),
+                            pymysql.converters.escape_string(item.get('content')),
+                            item.get('location'),
+                            item.get('image'),
+                            pymysql.converters.escape_string(item.get('related_topic')),
+                            item.get('url')
+                            )
+                self.cursor.execute(sql)
+                self.conn.commit()
+                print('successfully writing the data')
+            except BaseException as e:
+                print(e)
+                print("error writing sql:" + sql)
+        else:
+            print("data already inserted")

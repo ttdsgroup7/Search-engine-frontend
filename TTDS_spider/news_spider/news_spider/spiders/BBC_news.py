@@ -2,7 +2,7 @@ import logging
 import re
 
 import scrapy
-from scrapy import Spider, Request
+from scrapy import Request
 import json
 from scrapy.settings.default_settings import DEFAULT_REQUEST_HEADERS
 from TTDS_spider.news_spider.news_spider.items import NewsSpiderItem
@@ -11,7 +11,7 @@ logger2 = logging.getLogger()
 level = logging.INFO
 logger2.setLevel(level)
 
-hdlr2 = logging.FileHandler("./spider2.log",encoding='utf8')
+hdlr2 = logging.FileHandler("./spider2.log", encoding='utf-8')
 hdlr2.setLevel(level)
 logger2.addHandler(hdlr2)
 
@@ -20,14 +20,14 @@ class BbcNewsSpider(scrapy.Spider):
     name = 'BBC_news'
     allowed_domains = ['bbc.co.uk']
     start_urls = []
-    location_list = ['uk-england', 'uk-northern_ireland', 'uk-scotland', 'uk-wales', 'uk-isle_of_man', 'uk-jersey',
-                     'uk-guernsey',
-                     'Africa', 'China', 'India', 'Australia', 'US&Canada', '', '', '', '', '', '', '']
-    # location_list = ['','','','','']
+    location_list = ['United Kingdom', 'United Kingdom', 'United Kingdom', 'United Kingdom', 'Europe', 'Europe',
+                     'Europe',
+                     'Africa', 'China', 'India', 'Australia', 'US&Canada', '', '', '', '', '', '', '', 'Latin America',
+                     'Middle East']
+
     topic_list = ['world', 'world', 'world', 'world', 'world', 'world', 'world', 'world', 'world', 'world', 'world',
                   'world', 'business',
-                  'politics', 'tech', 'science', 'health', 'education', 'entertainment']
-    # topic_list=['technology', 'science&environment', 'health', 'family&education', 'environment&arts']
+                  'politics', 'tech', 'science', 'health', 'education', 'entertainment', 'world', 'world']
 
     def start_requests(self):
         DEFAULT_REQUEST_HEADERS['Accept'] = '*/*'
@@ -45,7 +45,7 @@ class BbcNewsSpider(scrapy.Spider):
                           encoding='utf-8')
             yield req
 
-            for pageNum in range(2,51):
+            for pageNum in range(2, 51):
                 try:
                     pre_post = re.match(r'(.*pageNumber%2F)\d+(%.*)', self.start_urls[index])
                     url = pre_post.group(1) + str(pageNum) + pre_post.group(2)
@@ -72,7 +72,7 @@ class BbcNewsSpider(scrapy.Spider):
                     metadata['topic'] = response.meta.get('topic')
                     yield Request(metadata["url"], callback=self.parse_content, meta=metadata)
             except BaseException as e:
-                print("something is wrong here:",e)
+                print("something is wrong here:", e)
 
     def parse_content(self, response):
         tag = re.search(r'https://bbc.co.uk/(.*)', response.meta.get("url", ""), re.I).group(1)
@@ -95,5 +95,5 @@ class BbcNewsSpider(scrapy.Spider):
         news_item['location'] = response.meta.get('location')
         news_item['related_topic'] = response.meta.get('topic')
         if content and news_item['headline']:
-            logger2.info(news_item['headline']+'--'+news_item['related_topic'] + "was submitted")
+            # logger2.info(news_item['headline'] + '--' + news_item['related_topic'] + "was submitted")
             yield news_item
