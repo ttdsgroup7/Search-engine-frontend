@@ -3,8 +3,8 @@ import requests
 from bs4 import BeautifulSoup
 import re
 
-name = 'TTDS_BBC'
-cmd1 = 'scrapy crawl {0}'.format(name)
+name = 'BBC_news'
+cmd1 = 'scrapy crawl {0} -s LOG_FILE=all.log'.format(name)
 if __name__ == '__main__':
     cmdline.execute(cmd1.split())
     # url = 'https://www.bbc.co.uk/news/world'
