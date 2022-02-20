@@ -8,7 +8,6 @@
             sm="6"
             md="8"
         >
-          <h4>The search time: xxxxx s</h4>
           <v-card>
 
           </v-card>
@@ -19,8 +18,10 @@
 
           >
             <v-card
-                :color="item.color"
-
+                class="elevation-1"
+                :class="{'elevation-1': item.isActive}"
+                :style="{'background-color': item.isActive ? '#f5f5f5' : '#ffffff'}"
+                :href="item.url"
             >
               <div class="d-flex flex-no-wrap justify-space-between">
                 <div>
@@ -31,7 +32,7 @@
 
                   <v-card-subtitle v-text="timestampConvert(item.publish_date)"></v-card-subtitle>
                   <v-card-text>
-                    {{ item.new_abstract }}
+                    {{ item.news_abstract }}
                   </v-card-text>
                   <v-divider class="mx-4"></v-divider>
                   <v-card-text>
@@ -41,24 +42,11 @@
                     >
                       <v-chip>{{ capitalizeFirstLetter(item.theme) }}</v-chip>
 
-                      <v-chip v-if="item.country !== ''">{{ countryCodes(item.country)[0] }}</v-chip>
-
-                      <v-chip v-if="countryCodes(item.country)[1] != null">{{ countryCodes(item.country)[1] }}</v-chip>
+                      <v-chip v-if="item.country !== null && item.country !== 'None'">{{ item.country }}</v-chip>
 
 
                     </v-chip-group>
                   </v-card-text>
-                  <v-card-actions>
-                    <v-btn
-                        class="ml-2 "
-                        outlined
-                        rounded
-                        small
-                        :href="item.url"
-                    >
-                      Read More
-                    </v-btn>
-                  </v-card-actions>
                 </div>
 
                 <v-avatar
@@ -81,7 +69,7 @@
           ></v-pagination>
         </v-col>
 
-       <related-reading-component></related-reading-component>
+        <related-reading-component v-show="this.$store.state.isLogin !== false"></related-reading-component>
       </v-row>
     </v-container>
   </div>
@@ -91,6 +79,7 @@
 
 import HeaderComponent from "@/views/component/HeaderComponent";
 import RelatedReadingComponent from "@/views/component/RelatedReadingComponent";
+
 
 export default {
   name: "resultComponent",
@@ -106,31 +95,38 @@ export default {
     totalPages: null,
     PageSize: 10,
     ifCounty: false,
+    countries: [],
+    theme: [],
   }),
   computed: {
-    // analyseListItem() {
-    //   let new_list = [];
-    //   // if (this.tab === 0){
-    //   //   new_list = this.items.filter(i => i.type === 'news');
-    //   // } else
-    //   if (this.tab === 1){
-    //     // let today = new Date().toJSON().slice(0,10).replace(/-/g,'/');
-    //     new_list = this.items.filter(i => this.timestampConvert(i.publish_date) === '01/01/2022');
-    //   } else {
-    //     return this.items;
-    //   }
-    //   // else {
-    //   //   new_list = this.items.filter(i => i.type === 'blog');
-    //   // }
-    //   return new_list
-    // }
+    // analyseListItem(newsList) {
+    //     let new_list = [];
+    //
+    //     if (this.tab === 1){
+    //       // let today = new Date().toJSON().slice(0,10).replace(/-/g,'/');
+    //       new_list = this.items.filter(i => this.timestampConvert(i.publish_date) === '01/01/2022');
+    //     } else {
+    //       return this.items;
+    //     }
+    //     // else {
+    //     //   new_list = this.items.filter(i => i.type === 'blog');
+    //     // }
+    //     return new_list
+    // },
+
     visiblePages() {
       return this.items.slice((this.page - 1) * this.PageSize, this.page * this.PageSize);
     }
-  },
+  }
+  ,
+  beforeCreate() {
+
+  }
+  ,
   watch: {
 
-  },
+  }
+  ,
   methods: {
     getItems(item) {
       this.items = item;
@@ -138,25 +134,6 @@ export default {
     },
     capitalizeFirstLetter(string) {
       return string.charAt(0).toUpperCase() + string.slice(1);
-    },
-    countryCodes(string){
-      let countryName, continentName;
-      if (string.includes('-')){
-        countryName = string.split('-')[0];
-        if(countryName === 'uk'){
-          countryName = 'UK';
-        }
-        if (string.includes('_')) {
-          this.ifCounty = true;
-          continentName = string.split('-')[1].replaceAll('_', ' ');
-          continentName = this.capitalizeFirstLetter(continentName);
-          return [countryName, continentName];
-        }
-        continentName = null;
-        return [countryName];
-      } else {
-        return [string];
-      }
     },
     timestampConvert(timeStamp) {
       let date = new Date(timeStamp);
@@ -168,7 +145,9 @@ export default {
       }
       if (month < 10) {
         month += 1;
-        month = '0' + month;
+        if (month !== 10) {
+          month = '0' + month;
+        }
       }
       return day + '/' + month + '/' + year
     },
@@ -177,5 +156,7 @@ export default {
 </script>
 
 <style scoped>
-
+.elevation-1 {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
 </style>

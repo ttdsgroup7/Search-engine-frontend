@@ -1,97 +1,82 @@
 <template>
-  <v-form
-      ref="form"
-      v-model="valid"
-      lazy-validation
-  >
-    <v-text-field
-        v-model="name"
-        :counter="10"
-        :rules="nameRules"
-        label="Username"
-        required
-    ></v-text-field>
+  <v-row
+      class="ma-7 pa-3"
+      no-gutters>
+    <v-col
+        md="6"
+        offset-md="3">
+      <v-form
+          ref="form"
+          lazy-validation
+      >
+        <v-text-field
+            v-model="name"
+            :counter="10"
+            label="Username"
+            required
+        ></v-text-field>
 
-    <v-text-field
-        v-model="password"
-        :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
-        :type="show2 ? 'text' : 'password'"
-        name="input-10-2"
-        label="Visible"
-        hint="At least 8 characters"
-        value="12345678"
-        class="input-group--focused"
-        @click:append="show2 = !show2"
-    ></v-text-field>
+        <v-text-field
+            v-model="password"
+            :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
+            :type="show2 ? 'text' : 'password'"
+            name="input-10-2"
+            label="Password"
+            class="input-group--focused"
+            @click:append="show2 = !show2"
+        ></v-text-field>
 
-    <v-select
-        v-model="select"
-        :items="items"
-        :rules="[v => !!v || 'Item is required']"
-        label="Item"
-        required
-    ></v-select>
+        <v-btn
+            color="success"
+            class="mr-4"
+            @click="toLogin"
+        >
+          Login
+        </v-btn>
 
+        <v-btn
+            color="error"
+            class="mr-4"
+            @click="register"
+        >
+          Register
+        </v-btn>
 
-    <v-btn
-        :disabled="!valid"
-        color="success"
-        class="mr-4"
-        @click="validate"
-    >
-      Validate
-    </v-btn>
-
-    <v-btn
-        color="error"
-        class="mr-4"
-        @click="reset"
-    >
-      Reset Form
-    </v-btn>
-
-  </v-form>
+      </v-form>
+    </v-col>
+  </v-row>
 </template>
 
 <script>
-import {register} from "@/api";
+import {login} from "@/api";
+
 export default {
   name: "LoginFormComponent",
   data: () => ({
-    valid: true,
     name: '',
     show2: false,
-    nameRules: [
-      v => !!v || 'Name is required',
-      v => (v && v.length <= 10) || 'Name must be less than 10 characters',
-    ],
     password: '',
-    emailRules: [
-      v => !!v || 'E-mail is required',
-      v => /.+@.+\..+/.test(v) || 'E-mail must be valid',
-    ],
-    select: null,
-    items: [
-      'Item 1',
-      'Item 2',
-      'Item 3',
-      'Item 4',
-    ],
-    checkbox: false,
   }),
 
   methods: {
-    validate() {
-      register({
+    toLogin() {
+      console.log(this.name, this.password);
+      let userPass = this.password;
+      login({
         password: this.password,
         username: this.name,
-      }).then(() => {
-
-        this.$router.push('/');
+      }).then((res) => {
+        console.log(res);
+        console.log(userPass);
+        this.$store.commit('setUser', {
+          username: this.name,
+          password: userPass,
+        });
+        this.$router.push('/search');
       });
     },
-    reset() {
-      this.$refs.form.reset()
+    register() {
+      this.$router.push('/register');
     },
 
   },

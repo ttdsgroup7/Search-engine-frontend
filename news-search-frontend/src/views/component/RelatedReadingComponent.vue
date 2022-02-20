@@ -7,57 +7,85 @@
       Related reading
     </h1>
     <v-list two-line>
-                  <v-list-item-group
-                      active-class="yellow--text"
-                      multiple
-                  >
-                    <template v-for="(item, index) in items">
-                      <v-list-item :key="item.head_line" :href="item.tag">
-                        <template v-slot:default>
-                          <v-list-item-content>
-                            <v-list-item-title v-text="item.head_line"></v-list-item-title>
+      <v-list-item-group
+          active-class="yellow--text"
+          multiple
+      >
+        <template v-for="(item, index) in relatedNewsUser">
+          <v-list-item :key="item.id" :href="item.url" @click="visitRecords">
+            <template v-slot:default>
+              <v-list-item-content>
+                <v-list-item-title v-text="item.head_line"></v-list-item-title>
 
-                            <v-list-item-subtitle
-                                class="text--primary"
-                                v-text="item.head_line"
-                            ></v-list-item-subtitle>
+                <v-list-item-subtitle
+                    class="text--primary"
+                    v-text="item.head_line"
+                ></v-list-item-subtitle>
 
-                            <v-list-item-subtitle v-text="item.publish_date"></v-list-item-subtitle>
-                          </v-list-item-content>
-                        </template>
-                      </v-list-item>
+                <v-list-item-subtitle v-text="item.publish_date"></v-list-item-subtitle>
+              </v-list-item-content>
+            </template>
+          </v-list-item>
 
-                      <v-divider
-                          v-if="index < items.length - 1"
-                          :key="index"
-                      ></v-divider>
-                    </template>
-                  </v-list-item-group>
+          <v-divider
+              v-if="index < items.length - 1"
+              :key="index"
+          ></v-divider>
+        </template>
+      </v-list-item-group>
     </v-list>
+
+    <div>
+      <v-alert
+          v-model="alert"
+          dismissible
+          color="cyan"
+          elevation="2"
+          colored-border
+          dark
+          border="top"
+          icon="mdi-home"
+          transition="scale-transition"
+      >
+        You've got <strong>5</strong> new updates on your timeline!.
+      </v-alert>
+    </div>
   </v-col>
 </template>
 
 <script>
-import {setRecommends} from "@/api";
+import {updateRecords} from "@/api";
+
+
 export default {
   name: "RelatedReadingComponent",
-  data (){
+  data() {
     return {
-      items:[],
-      username: 'test',
+      items: [],
+      alert: false,
     }
   },
-  created(){
-    // this.username = this.$store.state.username;
-    this.getRelated();
+  beforeCreate() {
+    //console.log('RelatedReadingComponent beforeCreate');
+    this.$store.dispatch('getRelatedNews');
+  },
+  computed: {
+    relatedNewsUser() {
+      console.log(this.$store.state.relatedNews);
+      return this.$store.state.relatedNews;
+    },
   },
   methods: {
-    getRelated(){
-      setRecommends(this.username).then(res => {
-        this.items = res.data.data;
-      })
-    }
-  }
+    visitRecords() {
+      updateRecords({
+        news_id: this.items.id,
+        username: this.$store.state.user.username,
+      }).then(response => {
+        console.log(response);
+        this.alert = true;
+      });
+    },
+  },
 }
 </script>
 

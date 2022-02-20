@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import Countries from "../utili/countries.js";
+import Countries from "../utils/countries.js";
 
 export default {
   name: 'Home',
