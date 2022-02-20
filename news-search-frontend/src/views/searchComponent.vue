@@ -4,10 +4,10 @@
       <v-row class="text-center">
         <v-col cols="12">
           <v-img
-              :src="require('../assets/logo.svg')"
+              :src="require('../assets/logon.png')"
               class="mt-16 mb-5"
               contain
-              height="200"
+              height="400"
           />
         </v-col>
         <v-col

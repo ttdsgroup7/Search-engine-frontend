@@ -72,7 +72,7 @@ export default {
           username: this.name,
           password: userPass,
         });
-        this.$router.push('/search');
+        this.$router.push({path:'/search', query:{search_phase: 'world'}});
       });
     },
     register() {

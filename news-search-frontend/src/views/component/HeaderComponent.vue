@@ -33,7 +33,7 @@
         <span @click="toHome">News search</span>
       </v-toolbar-title>
       <v-autocomplete
-          v-model="model"
+
           :items="items"
           :loading="isLoading"
           :search-input.sync="search"
@@ -121,11 +121,24 @@
         ></v-select>
         <v-select
             class="ma-2"
+            v-model="selected_type"
+            :items="selectType"
+            label="Search type"
+        ></v-select>
+        <v-select
+            class="ma-2"
             v-model="selected_theme"
             :items="themes"
             label="Theme"
         ></v-select>
+        <v-btn
+            @click="searchTerm"
+            class="ma-4"
 
+            raised
+        >
+          Search
+        </v-btn>
         <v-btn
             class="ma-2"
             @click="sortByDate"
@@ -155,19 +168,18 @@ export default {
     isAdvanceSearch: false,
     selected_theme: '',
     selected_country: '',
+    selected_type:'',
+    selectType:[
+      { text: 'OR', value: 'OR' },
+      { text: 'AND', value: 'AND' },
+    ],
   }),
   computed: {
 
   },
   watch: {
     tab(val) {
-      if (val === 0) {
-        this.getAllNews();
-      } else if (val === 1) {
-        this.getAllNewsNYT();
-      } else if (val === 2) {
-        this.getAllNewsBlog();
-      }
+        this.$emit('tab-change', val);
     },
     async search(term) {
       if (this.items.length < 0 || this.items.length == null) {
@@ -189,7 +201,8 @@ export default {
     //console.log(this.$route.query.search_phase);
     await this.getQuerySet(this.$route.query.search_phase);
     await getAllCountries().then(res => {
-      // console.log(res.data);
+
+      console.log(res.data.data);
       forEach(res.data.data, (item) => {
         this.countries.push({
           text: item.country,
@@ -207,6 +220,19 @@ export default {
     });
   },
   methods: {
+    searchTerm() {
+      let search_term;
+      if (this.selected_country && this.selected_theme && this.selected_type) {
+        search_term = this.selected_country + ' ' + this.selected_type + ' ' + this.selected_theme;
+      } else if (this.selected_country){
+        search_term = this.selected_country;
+      } else if (this.selected_theme){
+        search_term = this.selected_theme;
+      } else {
+        search_term = this.search;
+      }
+      this.getQuerySet(search_term);
+    },
     toNews(url) {
       window.location = url;
     },
@@ -239,7 +265,7 @@ export default {
           })
     },
     toHome() {
-      this.$router.push('/search');
+      this.$router.push('/');
     },
     toLogin() {
       this.$router.push('/login');
