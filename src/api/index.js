@@ -1,10 +1,10 @@
 import axios from "axios";
 
-let host_1 = 'https://gc.caohongchuan.top:8080';
+let host_1 = 'http://gc.caohongchuan.top:8080';
 // let host_2 = 'http://gc.caohongchuan.top:7788/';
 
 export const getSearch = (params) => {
-    return axios.get(host_1 +`/search/querynews/?query=${params}`)
+    return axios.get(host_1 +`/search/querynews?query=${params}`)
 }
 export const updateRecords = (params) => {
     return axios.put(host_1 +`/search/viewrecord`, params)
