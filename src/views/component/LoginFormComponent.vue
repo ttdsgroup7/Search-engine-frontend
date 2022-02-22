@@ -1,4 +1,5 @@
 <template>
+
   <v-row
       class="ma-7 pa-3"
       no-gutters>
@@ -41,6 +42,13 @@
         >
           Register
         </v-btn>
+        <v-btn
+            color="warning"
+            class="mr-4"
+            @click="goBack"
+        >
+          Back
+        </v-btn>
 
       </v-form>
     </v-col>
@@ -72,13 +80,15 @@ export default {
           username: this.name,
           password: userPass,
         });
-        this.$router.push({path:'/search', query:{search_phase: 'world'}});
+        this.$router.push({path: '/search', query: {search_phase: 'world'}});
       });
     },
     register() {
       this.$router.push('/register');
     },
-
+    goBack() {
+      this.$router.go(-1);
+    }
   },
 }
 </script>

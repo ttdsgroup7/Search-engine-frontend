@@ -18,7 +18,7 @@
             </v-list-item-icon>
             <v-list-item-title>Home</v-list-item-title>
           </v-list-item>
-          <v-list-item>
+          <v-list-item :href="toMap">
             <v-list-item-icon>
               <v-icon>mdi-map</v-icon>
             </v-list-item-icon>
@@ -45,6 +45,7 @@
           item-value="symbol"
           label="Search for a news..."
           solo
+
       >
         <template v-slot:selection="{ attr, on, item, selected }">
           <v-chip
@@ -61,7 +62,7 @@
           <v-list-item>
             <v-list-item-title>
               Search for your daily
-              <strong>Covid news</strong>
+              <strong>news</strong>
             </v-list-item-title>
           </v-list-item>
         </template>
@@ -82,12 +83,12 @@
           <v-tab>
             News
           </v-tab>
-          <v-tab>
-            The New York Times
-          </v-tab>
-          <v-tab>
-            Blog
-          </v-tab>
+<!--          <v-tab>-->
+<!--            The New York Times-->
+<!--          </v-tab>-->
+<!--          <v-tab>-->
+<!--            Blog-->
+<!--          </v-tab>-->
         </v-tabs>
         <v-btn @click="isAdvanceSearch = !isAdvanceSearch">
           Advanced search
@@ -115,18 +116,21 @@
       >
         <v-select
             class="ma-2"
+            filled
             v-model="selected_country"
             :items="countries"
-            label="Country"
+            label="Select a country"
         ></v-select>
         <v-select
             class="ma-2"
+            filled
             v-model="selected_type"
             :items="selectType"
             label="Search type"
         ></v-select>
         <v-select
             class="ma-2"
+            filled
             v-model="selected_theme"
             :items="themes"
             label="Theme"
@@ -134,7 +138,6 @@
         <v-btn
             @click="searchTerm"
             class="ma-4"
-
             raised
         >
           Search
@@ -146,6 +149,10 @@
           Sort by date
         </v-btn>
       </v-toolbar>
+    </div>
+    <div class="ma-6" v-if="queryFix">
+      <p>Your query should be <span class="fixed_term">{{ fixedTerm }}</span></p>
+      <p>You are trying to search <span class="search_term" @click="wrongSearch(search)">{{search}}</span></p>
     </div>
   </div>
 </template>
@@ -165,6 +172,9 @@ export default {
     isLoading: false,
     search: null,
     tab: 0,
+    queryFix: false,
+    fixedTerm:"",
+    wrongTerm: "",
     isAdvanceSearch: false,
     selected_theme: '',
     selected_country: '',
@@ -173,6 +183,7 @@ export default {
       { text: 'OR', value: 'OR' },
       { text: 'AND', value: 'AND' },
     ],
+    toMap:'http://data-map-d3.herokuapp.com/index.html',
   }),
   computed: {
 
@@ -200,9 +211,8 @@ export default {
   async created() {
     //console.log(this.$route.query.search_phase);
     await this.getQuerySet(this.$route.query.search_phase);
-    await getAllCountries().then(res => {
 
-      console.log(res.data.data);
+    await getAllCountries().then(res => {
       forEach(res.data.data, (item) => {
         this.countries.push({
           text: item.country,
@@ -220,14 +230,22 @@ export default {
     });
   },
   methods: {
+    wrongSearch(term) {
+      let wrongTerm = '"' + term + '"';
+      this.getQuerySet(wrongTerm);
+    },
     searchTerm() {
       let search_term;
       if (this.selected_country && this.selected_theme && this.selected_type) {
+        this.selected_country = this.selected_country.toLowerCase();
+        this.selected_theme = this.selected_theme.toLowerCase();
         search_term = this.selected_country + ' ' + this.selected_type + ' ' + this.selected_theme;
       } else if (this.selected_country){
         search_term = this.selected_country;
+        search_term = search_term.toLowerCase();
       } else if (this.selected_theme){
         search_term = this.selected_theme;
+        search_term = search_term.toLowerCase();
       } else {
         search_term = this.search;
       }
@@ -252,7 +270,13 @@ export default {
             this.$emit('update:items', this.items);
             this.totalPages = Math.ceil(this.items.length / this.PageSize);
             this.$route.query.search_phase = term;
-
+            if (response.data.data.rightQueryString) {
+              this.wrongTerm = term
+              this.queryFix = true;
+              this.fixedTerm = response.data.data.rightQueryString;
+            }else {
+              this.queryFix = false;
+            }
             // console.log(this.items);
             // console.log(this.items[0]);
           })
@@ -295,5 +319,20 @@ export default {
 </script>
 
 <style scoped>
-
+/*.fixed_term{*/
+/*  text-decoration: underline;*/
+/*  color: red;*/
+/*}*/
+/*.fixed_term:hover{*/
+/*  cursor: pointer;*/
+/*  color: rgba(255, 60, 0, 0.78);*/
+/*}*/
+.search_term{
+  text-decoration: underline;
+  color: red;
+}
+.search_term:hover{
+  cursor: pointer;
+  color: rgba(255, 60, 0, 0.78);
+}
 </style>

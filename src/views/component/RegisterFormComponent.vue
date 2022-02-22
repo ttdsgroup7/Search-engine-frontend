@@ -32,11 +32,18 @@
 
 
         <v-btn
-            color="warning"
+            color="success"
             class="mr-4"
             @click="registerAccount"
         >
           Register
+        </v-btn>
+        <v-btn
+            color="warning"
+            class="mr-4"
+            @click="goBack"
+        >
+          Back
         </v-btn>
 
       </v-form>
@@ -84,6 +91,9 @@ export default {
           .finally(() => {
             console.log('finally');
           });
+    },
+    goBack() {
+      this.$router.go(-1);
     }
   },
 }

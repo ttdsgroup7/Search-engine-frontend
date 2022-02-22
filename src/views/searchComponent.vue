@@ -7,7 +7,7 @@
               :src="require('../assets/logon.png')"
               class="mt-16 mb-5"
               contain
-              height="400"
+              height="300"
           />
         </v-col>
         <v-col
@@ -22,6 +22,7 @@
               item-text="name"
               item-value="symbol"
               label="Search for a news..."
+              @keydown.enter.prevent="searchTerm"
               solo
           ></v-text-field>
         </v-col>
@@ -39,7 +40,7 @@
           </v-btn>
 
           <v-btn
-              @click="searchTerm"
+              :href="'http://data-map-d3.herokuapp.com/index.html'"
               class="ma-4"
 
               raised
@@ -61,7 +62,7 @@ export default {
   }),
   methods:{
     searchTerm(){
-      console.log(this.model);
+      // console.log(this.model);
       this.$router.push({path:'/search', query:{search_phase: this.model}});
     }
   }

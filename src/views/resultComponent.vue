@@ -8,10 +8,19 @@
             sm="6"
             md="8"
         >
-          <v-card>
-
+          <v-card v-if="visiblePages.length === 0">
+              <v-alert
+                  :value="true"
+                  type="error"
+                  icon="info"
+              >
+                <span class="body-1">
+                  No results found.
+                </span>
+              </v-alert>
           </v-card>
           <v-col
+
               v-for="(item, index) in visiblePages"
               :key="index"
               cols="12"
@@ -60,6 +69,7 @@
             </v-card>
           </v-col>
           <v-pagination
+              v-if="visiblePages.length !== 0"
               v-model="page"
               :length="totalPages"
               circle
@@ -115,6 +125,7 @@ export default {
     // },
 
     visiblePages() {
+      window.scrollTo(0,0);
       return this.items.slice((this.page - 1) * this.PageSize, this.page * this.PageSize);
     }
   }
