@@ -83,14 +83,15 @@
           <v-tab>
             News
           </v-tab>
-<!--          <v-tab>-->
-<!--            The New York Times-->
-<!--          </v-tab>-->
-<!--          <v-tab>-->
-<!--            Blog-->
-<!--          </v-tab>-->
+          <v-tab
+              v-for="item in themes"
+              :key="item.value"
+              :value="tab"
+          >
+            {{ item.text }}
+          </v-tab>
         </v-tabs>
-        <v-btn @click="isAdvanceSearch = !isAdvanceSearch">
+        <v-btn @click="showAdvance">
           Advanced search
         </v-btn>
       </template>
@@ -110,27 +111,24 @@
         </v-btn>
       </div>
     </v-app-bar>
-    <div class="mt-3" v-if="isAdvanceSearch">
+    <div class="mt-6 pa-3" v-if="isAdvanceSearch">
       <v-toolbar
           flat
       >
         <v-select
             class="ma-2"
-            filled
             v-model="selected_country"
             :items="countries"
             label="Select a country"
         ></v-select>
         <v-select
             class="ma-2"
-            filled
             v-model="selected_type"
             :items="selectType"
             label="Search type"
         ></v-select>
         <v-select
             class="ma-2"
-            filled
             v-model="selected_theme"
             :items="themes"
             label="Theme"
@@ -158,7 +156,7 @@
 </template>
 
 <script>
-import {getAllCountries, getAllTheme, getSearch} from "@/api";
+import {getAllCountries, getAllTheme, getSearch, getNewsByTheme} from "@/api";
 import {forEach} from "core-js/internals/array-iteration";
 
 export default {
@@ -171,7 +169,7 @@ export default {
     themes: [],
     isLoading: false,
     search: null,
-    tab: 0,
+    tab: null,
     queryFix: false,
     fixedTerm:"",
     wrongTerm: "",
@@ -189,8 +187,20 @@ export default {
 
   },
   watch: {
-    tab(val) {
-        this.$emit('tab-change', val);
+    async tab(val) {
+        if (val !==0){
+          let selected = this.themes[val-1].value;
+          // console.log(selected);
+          await getNewsByTheme(selected)
+          .then((response)=>{
+            // console.log(response.data)
+            this.items = response.data.data;
+            this.$emit('update:items', this.items);
+          })
+        }else{
+          // console.log(this.$route.query);
+          await this.getQuerySet(this.$route.query.search_phase);
+        }
     },
     async search(term) {
       if (this.items.length < 0 || this.items.length == null) {
@@ -208,7 +218,7 @@ export default {
       await this.$router.push({query: searchQuery});
     }
   },
-  async created() {
+  async beforeMount() {
     //console.log(this.$route.query.search_phase);
     await this.getQuerySet(this.$route.query.search_phase);
 
@@ -222,14 +232,26 @@ export default {
     });
     await getAllTheme().then(res => {
       forEach(res.data.data, (item) => {
-        this.themes.push({
-          text: this.capitalizeFirstLetter(item.theme),
-          value: item.theme
-        });
+        if(item.theme === "world"){
+          this.themes.splice(0,0,{
+            text: this.capitalizeFirstLetter(item.theme),
+            value: item.theme
+          })
+        } else{
+          this.themes.push({
+            text: this.capitalizeFirstLetter(item.theme),
+            value: item.theme
+          });
+        }
+        // console.log(this.themes);
       });
     });
   },
   methods: {
+    showAdvance(){
+      this.isAdvanceSearch = !this.isAdvanceSearch;
+      window.scrollTo(0,0);
+    },
     wrongSearch(term) {
       let wrongTerm = '"' + term + '"';
       this.getQuerySet(wrongTerm);

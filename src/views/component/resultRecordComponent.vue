@@ -19,7 +19,7 @@
               class="elevation-1"
               :class="{'elevation-1': item.isActive}"
               :style="{'background-color': item.isActive ? '#f5f5f5' : '#ffffff'}"
-              :href="item.url"
+              @click="visitNews({url: item.url, id: item.id})"
           >
             <div class="d-flex flex-no-wrap justify-space-between">
               <div>
@@ -66,15 +66,29 @@
             prev-icon="mdi-menu-left"
         ></v-pagination>
       </v-col>
-
+      <rating-component v-if="showRating" :news-id="news_id" :show-rating="showRating"></rating-component>
       <related-reading-component v-show="this.$store.state.isLogin !== false"></related-reading-component>
     </v-row>
   </v-container>
 </template>
 
 <script>
+import RatingComponent from "@/views/component/RatingComponent";
 export default {
   name: "resultRecordComponent",
+  components: {
+    RatingComponent
+  },
+  props: {
+    newsId: {
+      type: Number,
+      required: true
+    },
+    showRating: {
+      type: Boolean,
+      required: true
+    }
+  },
   data: () => ({
     isLoading: false,
     items: [],
@@ -85,6 +99,8 @@ export default {
     ifCounty: false,
     countries: [],
     theme: [],
+    news_id: null,
+    showRating: false,
   }),
   computed: {
 
@@ -101,6 +117,12 @@ export default {
   watch: {}
   ,
   methods: {
+    visitNews(news){
+      console.log(news);
+      // window.open(news.url, '_blank');
+      this.news_id = news.id;
+      this.showRating = true;
+    },
     getItems(item) {
       this.items = item;
       this.totalPages = Math.ceil(this.items.length / this.PageSize);

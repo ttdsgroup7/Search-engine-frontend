@@ -12,7 +12,6 @@
       >
         <v-text-field
             v-model="name"
-            :counter="10"
             label="Username"
             required
         ></v-text-field>
@@ -25,12 +24,14 @@
             label="Password"
             class="input-group--focused"
             @click:append="show2 = !show2"
+            @keydown.enter.prevent="toLogin"
         ></v-text-field>
 
         <v-btn
             color="success"
             class="mr-4"
             @click="toLogin"
+
         >
           Login
         </v-btn>
@@ -68,18 +69,19 @@ export default {
 
   methods: {
     toLogin() {
-      console.log(this.name, this.password);
+      // console.log(this.name, this.password);
       let userPass = this.password;
       login({
         password: this.password,
         username: this.name,
       }).then((res) => {
-        console.log(res);
-        console.log(userPass);
+        // console.log(res.data);
+        // console.log(userPass);
         this.$store.commit('setUser', {
           username: this.name,
           password: userPass,
         });
+        localStorage.setItem('user_id', res.data.data.userId);
         this.$router.push({path: '/search', query: {search_phase: 'world'}});
       });
     },

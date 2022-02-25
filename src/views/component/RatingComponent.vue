@@ -1,20 +1,17 @@
 <template>
   <div>
-    <v-btn @click="overlay = true">
-      show overlay
-    </v-btn>
-    <v-overlay :value="overlay">
-      <v-card class=""
+    <v-overlay :value="showRating">
+      <v-card class="white"
               outlined>
         <v-card-title>
-        <span class="headline">
-          <v-icon>mdi-star</v-icon>
+        <span class="headline text--primary">
+          <v-icon color="blue">mdi-star</v-icon>
           <span>Rating!</span>
         </span>
         </v-card-title>
 
         <v-card-text>
-          <div class="text--primary red">
+          <div class="text--primary">
             How would you rate the article?
             <br>
             Please tell us your through!
@@ -27,7 +24,7 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn text @click="overlay = false">
+          <v-btn class="text--primary" text @click="closeOverlay">
             Submit
           </v-btn>
         </v-card-actions>
@@ -37,6 +34,7 @@
 </template>
 
 <script>
+// import {updateRecords} from "@/api";
 export default {
   name: "RatingComponent",
   data: () => ({
@@ -44,14 +42,16 @@ export default {
     overlay: false
 
   }),
+  props: ['showRating', 'newsId'],
   methods: {
-
-  },
-  watch: {
-    rating(val) {
-      console.log(val)
+    closeOverlay: function () {
+      console.log(this.newsId);
+      console.log(this.rating);
+      localStorage.getItem('user_id');
+      console.log(localStorage.getItem('user_id'));
+      this.showRating = false;
     },
-  }
+  },
 }
 </script>
 

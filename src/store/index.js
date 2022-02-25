@@ -21,6 +21,7 @@ export default new Vuex.Store({
     logout(state) {
       state.username = '';
       state.isLogin = false;
+      localStorage.removeItem('user_id');
     },
     setRelatedNews(state, relatedNews) {
       state.relatedNews = relatedNews;
@@ -28,13 +29,13 @@ export default new Vuex.Store({
   },
   actions: {
     getRelatedNews({ commit }) {
-      console.log('getRelatedNews');
+      // console.log('getRelatedNews');
       login({
         username: this.state.username,
         password: this.state.password,
       }).then(res => {
-        console.log(res);
-        console.log(res.data.data.newsarray);
+        // console.log(res);
+        // console.log(res.data.data.newsarray);
         commit('setRelatedNews', res.data.data.newsarray);
       })
     }

@@ -42,12 +42,10 @@
           <v-btn
               :href="'http://data-map-d3.herokuapp.com/index.html'"
               class="ma-4"
-
               raised
           >
             Check the map!
           </v-btn>
-          <rating-component></rating-component>
         </v-col>
       </v-row>
     </v-container>
@@ -55,12 +53,8 @@
 </template>
 
 <script>
-import RatingComponent from '@/views/component/RatingComponent.vue'
 export default {
   name: "searchComponent",
-  components: {
-    RatingComponent
-  },
   data: () =>({
     alignment: 'center',
     model: null,

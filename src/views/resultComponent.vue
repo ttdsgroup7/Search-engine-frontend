@@ -9,15 +9,15 @@
             md="8"
         >
           <v-card v-if="visiblePages.length === 0">
-              <v-alert
-                  :value="true"
-                  type="error"
-                  icon="info"
-              >
+            <v-alert
+                :value="true"
+                type="error"
+                icon="info"
+            >
                 <span class="body-1">
                   No results found.
                 </span>
-              </v-alert>
+            </v-alert>
           </v-card>
           <v-col
 
@@ -30,7 +30,7 @@
                 class="elevation-1"
                 :class="{'elevation-1': item.isActive}"
                 :style="{'background-color': item.isActive ? '#f5f5f5' : '#ffffff'}"
-                :href="item.url"
+                @click="visitNews({url: item.url, id: item.id})"
             >
               <div class="d-flex flex-no-wrap justify-space-between">
                 <div>
@@ -78,7 +78,36 @@
               prev-icon="mdi-menu-left"
           ></v-pagination>
         </v-col>
+        <v-overlay v-if="showRating">
+          <v-card class="white"
+                  outlined>
+            <v-card-title>
+        <span class="headline text--primary">
+          <v-icon color="blue">mdi-star</v-icon>
+          <span>Rating!</span>
+        </span>
+            </v-card-title>
 
+            <v-card-text>
+              <div class="text--primary">
+                How would you rate the article?
+                <br>
+                Please tell us your through!
+              </div>
+              <v-rating
+                  v-model="rating"
+                  :max="5"
+                  :value="rating"
+              ></v-rating>
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn class="text--primary" text @click="sendRating">
+                Submit
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-overlay>
         <related-reading-component v-show="this.$store.state.isLogin !== false"></related-reading-component>
       </v-row>
     </v-container>
@@ -89,13 +118,13 @@
 
 import HeaderComponent from "@/views/component/HeaderComponent";
 import RelatedReadingComponent from "@/views/component/RelatedReadingComponent";
-
+import {updateRecords} from "@/api";
 
 export default {
   name: "resultComponent",
   components: {
     HeaderComponent,
-    RelatedReadingComponent
+    RelatedReadingComponent,
   },
   data: () => ({
     isLoading: false,
@@ -107,38 +136,43 @@ export default {
     ifCounty: false,
     countries: [],
     theme: [],
+    news_id: null,
+    rating: 3,
+    showRating: false,
   }),
   computed: {
-    // analyseListItem(newsList) {
-    //     let new_list = [];
-    //
-    //     if (this.tab === 1){
-    //       // let today = new Date().toJSON().slice(0,10).replace(/-/g,'/');
-    //       new_list = this.items.filter(i => this.timestampConvert(i.publish_date) === '01/01/2022');
-    //     } else {
-    //       return this.items;
-    //     }
-    //     // else {
-    //     //   new_list = this.items.filter(i => i.type === 'blog');
-    //     // }
-    //     return new_list
-    // },
-
     visiblePages() {
-      window.scrollTo(0,0);
+      window.scrollTo(0, 0);
       return this.items.slice((this.page - 1) * this.PageSize, this.page * this.PageSize);
     }
-  }
-  ,
+  },
   beforeCreate() {
 
-  }
-  ,
-  watch: {
-
-  }
-  ,
+  },
+  watch: {},
   methods: {
+    visitNews(news) {
+      console.log(news);
+      window.open(news.url, '_blank');
+      this.news_id = news.id;
+      setTimeout(() => {
+        this.showRating = true;
+      }, 500);
+
+    },
+    sendRating() {
+      updateRecords({
+        newsLogsItemList: {
+          news_id: this.news_id,
+          user_id: localStorage.getItem('user_id'),
+          prefer_degree: this.rating
+        },
+        username: this.$store.state.username,
+      }).then((response) => {
+        console.log(response);
+        this.showRating = false;
+      });
+    },
     getItems(item) {
       this.items = item;
       this.totalPages = Math.ceil(this.items.length / this.PageSize);

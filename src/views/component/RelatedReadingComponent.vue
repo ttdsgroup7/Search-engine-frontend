@@ -79,8 +79,9 @@ export default {
     visitRecords() {
       updateRecords({
         news_id: this.items.id,
-        username: this.$store.state.user.username,
-      }).then(response => {
+        user_id: localStorage.getItem('user_id'),
+        prefer_degree: 1,
+      }).then((response) => {
         console.log(response);
         this.alert = true;
       });

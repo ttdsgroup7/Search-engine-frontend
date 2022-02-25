@@ -30,3 +30,9 @@ export const getAllThemeCountries = () => {
 export const getAllTheme = () => {
     return axios.get(host_1 + `/search/gettheme`)
 }
+export const getNewsByTheme = (params) => {
+    return axios.get(host_1 + `/search/newsbytheme?theme=${params}`)
+}
+export const getNewsByCountry = (params) => {
+    return axios.get(host_1 + `/search/newsbycountry?country=${params}`)
+}
