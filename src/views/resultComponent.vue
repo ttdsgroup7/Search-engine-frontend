@@ -162,11 +162,11 @@ export default {
     },
     sendRating() {
       updateRecords({
-        newsLogsItemList: {
+        newsLogsItemList: [{
           news_id: this.news_id,
-          user_id: localStorage.getItem('user_id'),
+          // user_id: localStorage.getItem('user_id'),
           prefer_degree: this.rating
-        },
+        }],
         username: this.$store.state.username,
       }).then((response) => {
         console.log(response);

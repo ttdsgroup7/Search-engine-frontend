@@ -66,7 +66,7 @@ export default {
     }
   },
   beforeCreate() {
-    //console.log('RelatedReadingComponent beforeCreate');
+    console.log('RelatedReadingComponent beforeCreate');
     this.$store.dispatch('getRelatedNews');
   },
   computed: {
