@@ -54,7 +54,7 @@
         </template>
         <template v-slot:item="{ item }">
           <v-list-item-content>
-            <v-list-item-title v-text="item"></v-list-item-title>
+            <v-list-item-title v-text="item" @click="getQuerySet(item, this.$props.pageNumb, this.$props.pageSize)"></v-list-item-title>
           </v-list-item-content>
         </template>
       </v-autocomplete>
@@ -88,7 +88,7 @@
         Login
       </v-btn>
       <div v-if="$store.state.isLogin === true">
-        <v-chip class="ma-3"  text-color="black">
+        <v-chip class="ma-3" text-color="black">
           {{ $store.state.username }}
         </v-chip>
 
@@ -100,41 +100,57 @@
       </div>
     </v-app-bar>
     <div class="mt-6 pa-3" v-if="isAdvanceSearch">
-      <v-toolbar
-          flat
-      >
-        <v-select
-            class="ma-2"
-            v-model="selected_country"
-            :items="countries"
-            label="Select a country"
-        ></v-select>
-        <v-select
-            class="ma-2"
-            v-model="selected_type"
-            :items="selectType"
-            label="Search type"
-        ></v-select>
-        <v-select
-            class="ma-2"
-            v-model="selected_theme"
-            :items="themes"
-            label="Theme"
-        ></v-select>
-        <v-btn
-            @click="searchTerm"
-            class="ma-4"
-            raised
-        >
-          Search
-        </v-btn>
-        <v-btn
-            class="ma-2"
-            @click="sortByDate"
-        >
-          Sort by date
-        </v-btn>
-      </v-toolbar>
+      <v-row>
+        <v-col cols="12" sm="4">
+          <v-select
+
+              v-model="selected_country"
+              :items="countries"
+              label="Select a country"
+          ></v-select>
+        </v-col>
+        <v-col cols="12" sm="4">
+          <v-select
+
+              v-model="selected_type"
+              :items="selectType"
+              label="Search type"
+          ></v-select>
+        </v-col>
+        <v-col cols="12" sm="4">
+          <v-select
+
+              v-model="selected_theme"
+              :items="themes"
+              label="Theme"
+          ></v-select>
+        </v-col>
+      </v-row>
+      <v-row v-if="dontShow">
+        <v-col cols="12" sm="6">
+          <DatepickerComponent label="Start Date" @clicked="onclickStart"></DatepickerComponent>
+        </v-col>
+        <v-col cols="12" sm="6">
+          <DatepickerComponent label="End Date" @clicked="onclickEnd"></DatepickerComponent>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="12" sm="6">
+          <v-btn
+              @click="searchTerm"
+              class="ma-4"
+              raised
+          >
+            Search
+          </v-btn>
+          <v-btn
+              class="ma-2"
+              @click="sortByDate"
+          >
+            Sort by date
+          </v-btn>
+        </v-col>
+      </v-row>
     </div>
     <div class="ma-6" v-if="queryFix">
       <p>Your query should be <span class="fixed_term">{{ fixedTerm }}</span></p>
@@ -144,37 +160,48 @@
 </template>
 
 <script>
+
 import {getAllCountries, getAllTheme, getNewsByTheme, getSearch, getWordCorrection} from "@/api";
 import {forEach} from "core-js/internals/array-iteration";
+import DatepickerComponent from "@/views/component/DatepickerComponent";
 
 export default {
   name: "HeaderComponent",
   props: ['pageSize', 'pageNumb', 'totalPages'],
-  data: () => ({
-    drawer: false,
-    group: null,
-    newItems: [],
-    countries: [],
-    themes: [],
-    isLoading: false,
-    search: null,
-    tab: null,
-    queryFix: false,
-    fixedTerm: "",
-    wrongTerm: "",
-    isAdvanceSearch: false,
-    selected_theme: '',
-    selected_country: '',
-    selected_type: '',
-    search_correction: [],
-    model:null,
-    selectType: [
-      {text: 'OR', value: 'OR'},
-      {text: 'AND', value: 'AND'},
-    ],
-    toMap: 'http://data-map-d3.herokuapp.com/index.html',
-  }),
+  components: {
+    DatepickerComponent
+  },
+  data() {
+    return {
+      dontShow:false,
+      startDate: "",
+      endDate: "",
+      drawer: false,
+      group: null,
+      newItems: [],
+      countries: [],
+      themes: [],
+      isLoading: false,
+      search: null,
+      tab: null,
+      queryFix: false,
+      fixedTerm: "",
+      wrongTerm: "",
+      isAdvanceSearch: false,
+      selected_theme: '',
+      selected_country: '',
+      selected_type: '',
+      search_correction: [],
+      model: null,
+      selectType: [
+        {text: 'OR', value: 'OR'},
+        {text: 'AND', value: 'AND'},
+      ],
+      toMap: 'http://data-map-d3.herokuapp.com/index.html',
+    }
+  },
   computed: {
+
   },
   watch: {
     async tab(val) {
@@ -194,10 +221,12 @@ export default {
         // console.log(this.$route.query);
         await this.getQuerySet(this.$route.query.search_phase, this.$props.pageNumb, this.$props.pageSize);
       }
-    },
-    async pageNumb(val){
+    }
+    ,
+    async pageNumb(val) {
       await this.getQuerySet(this.$route.query.search_phase, val, this.$props.pageSize);
-    },
+    }
+    ,
     async search(term) {
       if (this.newItems.length < 0 || this.newItems.length == null) {
         //console.log(term);
@@ -218,7 +247,8 @@ export default {
       searchQuery.search_phase = term;
       await this.$router.push({query: searchQuery});
     }
-  },
+  }
+  ,
   async beforeMount() {
     //console.log(this.$route.query.search_phase);
     await this.getQuerySet(this.$route.query.search_phase, this.$props.pageNumb, this.$props.pageSize);
@@ -247,17 +277,26 @@ export default {
         // console.log(this.themes);
       });
     });
-  },
+  }
+  ,
   methods: {
+    onclickStart(value){
+      this.startDate = value + ' 00:00:00';
+    },
+    onclickEnd(value){
+      this.endDate = value + ' 00:00:00';
+    },
     showAdvance() {
       this.isAdvanceSearch = !this.isAdvanceSearch;
       window.scrollTo(0, 0);
-    },
+    }
+    ,
     wrongSearch(term) {
       console.log(term)
       this.getQuerySet(term, this.$props.pageNumb, this.$props.pageSize);
       this.queryFix = false;
-    },
+    }
+    ,
     searchTerm() {
       let search_term;
       if (this.selected_country && this.selected_theme && this.selected_type) {
@@ -274,18 +313,22 @@ export default {
         search_term = this.search;
       }
       this.getQuerySet(search_term);
-    },
+    }
+    ,
     toNews(url) {
       window.location = url;
-    },
+    }
+    ,
     sortByDate() {
       return this.newItems.sort((a, b) => {
         return new Date(b.publish_date) - new Date(a.publish_date);
       });
-    },
+    }
+    ,
     capitalizeFirstLetter(string) {
       return string.charAt(0).toUpperCase() + string.slice(1);
-    },
+    }
+    ,
     getQuerySet(term, pageNumb, pageSize) {
       getSearch(term, pageNumb, pageSize)
           .then((response) => {
@@ -310,17 +353,21 @@ export default {
           .finally(() => {
             this.isLoading = false;
           })
-    },
+    }
+    ,
     toHome() {
       this.$router.push('/');
-    },
+    }
+    ,
     toLogin() {
       this.$router.push('/login');
-    },
+    }
+    ,
     toLogout() {
       this.$store.commit('logout');
       this.$router.push('/');
-    },
+    }
+    ,
     timestampConvert(timeStamp) {
       let date = new Date(timeStamp);
       let year = date.getFullYear();
@@ -336,7 +383,8 @@ export default {
         }
       }
       return day + '/' + month + '/' + year
-    },
+    }
+    ,
   }
 }
 </script>

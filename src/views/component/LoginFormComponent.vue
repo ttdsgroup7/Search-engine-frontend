@@ -89,7 +89,7 @@ export default {
         // console.log(res);
         // console.log(userPass);
 
-        if (res.status === '200') {
+        if (res.code === '200') {
           this.$store.commit('setUser', {
             username: this.name,
             password: userPass,
