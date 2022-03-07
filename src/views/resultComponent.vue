@@ -1,6 +1,6 @@
 <template>
   <div>
-    <header-component @update:items="getItems"></header-component>
+    <header-component @update:items="getItems" :page-numb="this.page" :page-size="this.PageSize"></header-component>
     <v-container fluid>
       <v-row no-gutters>
         <v-col
@@ -8,7 +8,7 @@
             sm="6"
             md="8"
         >
-          <v-card v-if="visiblePages.length === 0">
+          <v-card v-if="items.length === 0">
             <v-alert
                 :value="true"
                 type="error"
@@ -21,7 +21,7 @@
           </v-card>
           <v-col
 
-              v-for="(item, index) in visiblePages"
+              v-for="(item, index) in items"
               :key="index"
               cols="12"
 
@@ -69,7 +69,7 @@
             </v-card>
           </v-col>
           <v-pagination
-              v-if="visiblePages.length !== 0"
+              v-if="this.items.length !== 0"
               v-model="page"
               :length="totalPages"
               circle
@@ -78,17 +78,26 @@
               prev-icon="mdi-menu-left"
           ></v-pagination>
         </v-col>
-        <v-overlay v-if="showRating">
+        <v-overlay :value="showRating">
           <v-card class="white"
-                  outlined>
-            <v-card-title>
-        <span class="headline text--primary">
-          <v-icon color="blue">mdi-star</v-icon>
-          <span>Rating!</span>
-        </span>
-            </v-card-title>
+                  outlined
+          >
+            <v-app-bar class="white">
+              <v-toolbar-title class="text-h6 grey--text pl-0">
+                <v-icon color="blue">mdi-star</v-icon>
+                <span>Rating!</span>
+              </v-toolbar-title>
+              <v-spacer></v-spacer>
+              <v-btn
+                  icon
+                  class="grey"
+                  @click="showRating = false"
+              >
+                <v-icon>mdi-close</v-icon>
+              </v-btn>
+            </v-app-bar>
 
-            <v-card-text>
+            <v-card-text class="align-center">
               <div class="text--primary">
                 How would you rate the article?
                 <br>
@@ -108,7 +117,10 @@
             </v-card-actions>
           </v-card>
         </v-overlay>
-        <related-reading-component v-show="this.$store.state.isLogin !== false"></related-reading-component>
+        <div>
+          <related-reading-component v-if="this.$store.state.isLogin !== false"></related-reading-component>
+          <p v-else> You have to login to load your recommendations!</p>
+        </div>
       </v-row>
     </v-container>
   </div>
@@ -140,16 +152,15 @@ export default {
     rating: 3,
     showRating: false,
   }),
-  computed: {
-    visiblePages() {
-      window.scrollTo(0, 0);
-      return this.items.slice((this.page - 1) * this.PageSize, this.page * this.PageSize);
-    }
-  },
+  computed: {},
   beforeCreate() {
 
   },
-  watch: {},
+  watch: {
+    page() {
+      window.scrollTo(0, 0);
+    }
+  },
   methods: {
     visitNews(news) {
       console.log(news);
@@ -174,8 +185,9 @@ export default {
       });
     },
     getItems(item) {
-      this.items = item;
-      this.totalPages = Math.ceil(this.items.length / this.PageSize);
+      // console.log(item);
+      this.items = item.list;
+      this.totalPages = item.navigatePages;
     },
     capitalizeFirstLetter(string) {
       return string.charAt(0).toUpperCase() + string.slice(1);

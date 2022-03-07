@@ -3,10 +3,25 @@
       cols="6"
       md="4"
   >
+    <div>
+    <v-alert
+        v-model="alert"
+        dismissible
+        color="cyan"
+        elevation="2"
+        colored-border
+        dark
+        border="top"
+        icon="mdi-home"
+        transition="scale-transition"
+    >
+      You've got <strong>1</strong> new updates on your view record!.
+    </v-alert>
+  </div>
     <h1 class="ma-4">
       Related reading
     </h1>
-    <v-list two-line>
+    <v-list two-line v-if="relatedNewsUser !== 0">
       <v-list-item-group
           active-class="yellow--text"
           multiple
@@ -34,22 +49,10 @@
         </template>
       </v-list-item-group>
     </v-list>
+    <p v-else>
+      You don't have any recommendations at the moment!
+    </p>
 
-    <div>
-      <v-alert
-          v-model="alert"
-          dismissible
-          color="cyan"
-          elevation="2"
-          colored-border
-          dark
-          border="top"
-          icon="mdi-home"
-          transition="scale-transition"
-      >
-        You've got <strong>5</strong> new updates on your timeline!.
-      </v-alert>
-    </div>
   </v-col>
 </template>
 
@@ -66,12 +69,14 @@ export default {
     }
   },
   beforeCreate() {
-    console.log('RelatedReadingComponent beforeCreate');
-    this.$store.dispatch('getRelatedNews');
+    // console.log('RelatedReadingComponent beforeCreate');
+    if (this.$store.state.isLogin){
+      this.$store.dispatch('getRelatedNews');
+    }
   },
   computed: {
     relatedNewsUser() {
-      console.log(this.$store.state.relatedNews);
+      // console.log(this.$store.state.relatedNews);
       return this.$store.state.relatedNews;
     },
   },

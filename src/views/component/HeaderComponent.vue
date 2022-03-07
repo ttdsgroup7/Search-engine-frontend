@@ -33,31 +33,17 @@
         <span @click="toHome">News search</span>
       </v-toolbar-title>
       <v-autocomplete
-
-          :items="items"
+          v-model="model"
+          :items="search_correction"
           :loading="isLoading"
           :search-input.sync="search"
-          chips
           clearable
           hide-details
           hide-selected
           item-text="name"
-          item-value="symbol"
           label="Search for a news..."
           solo
-
       >
-        <template v-slot:selection="{ attr, on, item, selected }">
-          <v-chip
-              v-bind="attr"
-              :input-value="selected"
-              color="blue-grey"
-              class="white--text"
-              v-on="on"
-          >
-            <span v-text="item.head_line"></span>
-          </v-chip>
-        </template>
         <template v-slot:no-data>
           <v-list-item>
             <v-list-item-title>
@@ -67,9 +53,8 @@
           </v-list-item>
         </template>
         <template v-slot:item="{ item }">
-          <v-list-item-content @click="toNews(item.url)">
-            <v-list-item-title v-text="item.head_line"></v-list-item-title>
-            <v-list-item-subtitle v-text="timestampConvert(item.publish_date)"></v-list-item-subtitle>
+          <v-list-item-content>
+            <v-list-item-title v-text="item"></v-list-item-title>
           </v-list-item-content>
         </template>
       </v-autocomplete>
@@ -103,9 +88,12 @@
         Login
       </v-btn>
       <div v-if="$store.state.isLogin === true">
-        {{ $store.state.username }}
+        <v-chip class="ma-3"  text-color="black">
+          {{ $store.state.username }}
+        </v-chip>
+
         <v-btn
-            class="ml-4"
+            class="ml-2"
             @click="toLogout">
           Logout
         </v-btn>
@@ -150,69 +138,82 @@
     </div>
     <div class="ma-6" v-if="queryFix">
       <p>Your query should be <span class="fixed_term">{{ fixedTerm }}</span></p>
-      <p>You are trying to search <span class="search_term" @click="wrongSearch(search)">{{search}}</span></p>
+      <p>You are trying to search <span class="search_term" @click="wrongSearch(fixedTerm)">{{ wrongTerm }}</span></p>
     </div>
   </div>
 </template>
 
 <script>
-import {getAllCountries, getAllTheme, getSearch, getNewsByTheme} from "@/api";
+import {getAllCountries, getAllTheme, getNewsByTheme, getSearch, getWordCorrection} from "@/api";
 import {forEach} from "core-js/internals/array-iteration";
 
 export default {
   name: "HeaderComponent",
+  props: ['pageSize', 'pageNumb', 'totalPages'],
   data: () => ({
     drawer: false,
     group: null,
-    items: [],
+    newItems: [],
     countries: [],
     themes: [],
     isLoading: false,
     search: null,
     tab: null,
     queryFix: false,
-    fixedTerm:"",
+    fixedTerm: "",
     wrongTerm: "",
     isAdvanceSearch: false,
     selected_theme: '',
     selected_country: '',
-    selected_type:'',
-    selectType:[
-      { text: 'OR', value: 'OR' },
-      { text: 'AND', value: 'AND' },
+    selected_type: '',
+    search_correction: [],
+    model:null,
+    selectType: [
+      {text: 'OR', value: 'OR'},
+      {text: 'AND', value: 'AND'},
     ],
-    toMap:'http://data-map-d3.herokuapp.com/index.html',
+    toMap: 'http://data-map-d3.herokuapp.com/index.html',
   }),
   computed: {
-
   },
   watch: {
     async tab(val) {
-        if (val !==0){
-          let selected = this.themes[val-1].value;
-          // console.log(selected);
-          await getNewsByTheme(selected)
-          .then((response)=>{
-            // console.log(response.data)
-            this.items = response.data.data;
-            this.$emit('update:items', this.items);
-          })
-        }else{
-          // console.log(this.$route.query);
-          await this.getQuerySet(this.$route.query.search_phase);
-        }
+      if (val !== 0) {
+        let selected = this.themes[val - 1].value;
+        // console.log(selected);
+        await getNewsByTheme(selected, this.$props.pageNumb, this.$props.pageSize)
+            .then((response) => {
+              console.log(response.data)
+              this.newItems = response.data.data;
+              this.$emit('update:items', this.newItems);
+              const searchQuery = JSON.parse((JSON.stringify(this.$route.query)));
+              searchQuery.search_phase = selected;
+              this.$router.push({query: searchQuery});
+            })
+      } else {
+        // console.log(this.$route.query);
+        await this.getQuerySet(this.$route.query.search_phase, this.$props.pageNumb, this.$props.pageSize);
+      }
+    },
+    async pageNumb(val){
+      await this.getQuerySet(this.$route.query.search_phase, val, this.$props.pageSize);
     },
     async search(term) {
-      if (this.items.length < 0 || this.items.length == null) {
+      if (this.newItems.length < 0 || this.newItems.length == null) {
         //console.log(term);
-        this.items = [];
+        this.newItems = [];
         return
       }
+      await getWordCorrection(term)
+          .then((response) => {
+            // console.log(response.data.data);
+            this.search_correction = response.data.data;
+          })
 
       this.isLoading = true;
       // console.log(term);
 
-      await this.getQuerySet(term);
+      await this.getQuerySet(term, this.$props.pageNumb, this.$props.pageSize);
       const searchQuery = JSON.parse((JSON.stringify(this.$route.query)));
       searchQuery.search_phase = term;
       await this.$router.push({query: searchQuery});
@@ -220,7 +221,7 @@ export default {
   },
   async beforeMount() {
     //console.log(this.$route.query.search_phase);
-    await this.getQuerySet(this.$route.query.search_phase);
+    await this.getQuerySet(this.$route.query.search_phase, this.$props.pageNumb, this.$props.pageSize);
 
     await getAllCountries().then(res => {
       forEach(res.data.data, (item) => {
@@ -232,12 +233,12 @@ export default {
     });
     await getAllTheme().then(res => {
       forEach(res.data.data, (item) => {
-        if(item.theme === "world"){
-          this.themes.splice(0,0,{
+        if (item.theme === "world") {
+          this.themes.splice(0, 0, {
             text: this.capitalizeFirstLetter(item.theme),
             value: item.theme
           })
-        } else{
+        } else {
           this.themes.push({
             text: this.capitalizeFirstLetter(item.theme),
             value: item.theme
@@ -248,13 +249,14 @@ export default {
     });
   },
   methods: {
-    showAdvance(){
+    showAdvance() {
       this.isAdvanceSearch = !this.isAdvanceSearch;
-      window.scrollTo(0,0);
+      window.scrollTo(0, 0);
     },
     wrongSearch(term) {
-      let wrongTerm = '"' + term + '"';
-      this.getQuerySet(wrongTerm);
+      console.log(term)
+      this.getQuerySet(term, this.$props.pageNumb, this.$props.pageSize);
+      this.queryFix = false;
     },
     searchTerm() {
       let search_term;
@@ -262,10 +264,10 @@ export default {
         this.selected_country = this.selected_country.toLowerCase();
         this.selected_theme = this.selected_theme.toLowerCase();
         search_term = this.selected_country + ' ' + this.selected_type + ' ' + this.selected_theme;
-      } else if (this.selected_country){
+      } else if (this.selected_country) {
         search_term = this.selected_country;
         search_term = search_term.toLowerCase();
-      } else if (this.selected_theme){
+      } else if (this.selected_theme) {
         search_term = this.selected_theme;
         search_term = search_term.toLowerCase();
       } else {
@@ -277,26 +279,25 @@ export default {
       window.location = url;
     },
     sortByDate() {
-      return this.items.sort((a, b) => {
+      return this.newItems.sort((a, b) => {
         return new Date(b.publish_date) - new Date(a.publish_date);
       });
     },
     capitalizeFirstLetter(string) {
       return string.charAt(0).toUpperCase() + string.slice(1);
     },
-    getQuerySet(term) {
-      getSearch(term)
+    getQuerySet(term, pageNumb, pageSize) {
+      getSearch(term, pageNumb, pageSize)
           .then((response) => {
-            // console.log(response.data.data);
-            this.items = response.data.data['newsarray'];
-            this.$emit('update:items', this.items);
-            this.totalPages = Math.ceil(this.items.length / this.PageSize);
+            console.log(response.data.data['newsarray']);
+            this.newItems = response.data.data['newsarray'];
+            this.$emit('update:items', this.newItems);
             this.$route.query.search_phase = term;
             if (response.data.data.rightQueryString) {
               this.wrongTerm = term
               this.queryFix = true;
               this.fixedTerm = response.data.data.rightQueryString;
-            }else {
+            } else {
               this.queryFix = false;
             }
             // console.log(this.items);
@@ -304,7 +305,7 @@ export default {
           })
           .catch((err) => {
             console.error(err);
-            this.items = [];
+            this.newItems = [];
           })
           .finally(() => {
             this.isLoading = false;
@@ -349,11 +350,12 @@ export default {
 /*  cursor: pointer;*/
 /*  color: rgba(255, 60, 0, 0.78);*/
 /*}*/
-.search_term{
+.search_term {
   text-decoration: underline;
   color: red;
 }
-.search_term:hover{
+
+.search_term:hover {
   cursor: pointer;
   color: rgba(255, 60, 0, 0.78);
 }

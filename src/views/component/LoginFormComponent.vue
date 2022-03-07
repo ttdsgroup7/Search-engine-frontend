@@ -6,6 +6,16 @@
     <v-col
         md="6"
         offset-md="3">
+      <v-alert
+          v-if="error"
+          dense
+          outlined
+          type="error"
+          dismissible
+      >
+        Wrong information please try again!
+      </v-alert>
+
       <v-form
           ref="form"
           lazy-validation
@@ -65,6 +75,7 @@ export default {
     name: '',
     show2: false,
     password: '',
+    error: false
   }),
 
   methods: {
@@ -75,14 +86,21 @@ export default {
         password: this.password,
         username: this.name,
       }).then((res) => {
-        // console.log(res.data);
+        // console.log(res);
         // console.log(userPass);
-        this.$store.commit('setUser', {
-          username: this.name,
-          password: userPass,
-        });
-        localStorage.setItem('user_id', res.data.data.userId);
-        this.$router.push({path: '/search', query: {search_phase: 'world'}});
+
+        if (res.status === '200') {
+          this.$store.commit('setUser', {
+            username: this.name,
+            password: userPass,
+          });
+          localStorage.setItem('user_id', res.data.data.userId);
+          this.$router.push({path: '/search', query: {search_phase: 'world'}});
+        } else {
+          this.error = true;
+        }
+      }).catch(error => {
+        console.log(error)
       });
     },
     register() {
