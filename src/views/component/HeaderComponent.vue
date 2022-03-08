@@ -54,7 +54,8 @@
         </template>
         <template v-slot:item="{ item }">
           <v-list-item-content>
-            <v-list-item-title v-text="item" @click="getQuerySet(item, this.$props.pageNumb, this.$props.pageSize)"></v-list-item-title>
+            <v-list-item-title v-text="item"
+                               @click="getQuerySet(item, this.$props.pageNumb, this.$props.pageSize)"></v-list-item-title>
           </v-list-item-content>
         </template>
       </v-autocomplete>
@@ -126,7 +127,7 @@
           ></v-select>
         </v-col>
       </v-row>
-      <v-row v-if="dontShow">
+      <v-row>
         <v-col cols="12" sm="6">
           <DatepickerComponent label="Start Date" @clicked="onclickStart"></DatepickerComponent>
         </v-col>
@@ -161,7 +162,7 @@
 
 <script>
 
-import {getAllCountries, getAllTheme, getNewsByTheme, getSearch, getWordCorrection} from "@/api";
+import {getAllCountries, getAllTheme, getNewsByTheme, getNewsByTime, getSearch, getWordCorrection} from "@/api";
 import {forEach} from "core-js/internals/array-iteration";
 import DatepickerComponent from "@/views/component/DatepickerComponent";
 
@@ -173,7 +174,7 @@ export default {
   },
   data() {
     return {
-      dontShow:false,
+      dontShow: false,
       startDate: "",
       endDate: "",
       drawer: false,
@@ -187,6 +188,7 @@ export default {
       queryFix: false,
       fixedTerm: "",
       wrongTerm: "",
+      searchType: '',
       isAdvanceSearch: false,
       selected_theme: '',
       selected_country: '',
@@ -200,9 +202,7 @@ export default {
       toMap: 'http://data-map-d3.herokuapp.com/index.html',
     }
   },
-  computed: {
-
-  },
+  computed: {},
   watch: {
     async tab(val) {
       if (val !== 0) {
@@ -280,10 +280,10 @@ export default {
   }
   ,
   methods: {
-    onclickStart(value){
+    onclickStart(value) {
       this.startDate = value + ' 00:00:00';
     },
-    onclickEnd(value){
+    onclickEnd(value) {
       this.endDate = value + ' 00:00:00';
     },
     showAdvance() {
@@ -298,21 +298,32 @@ export default {
     }
     ,
     searchTerm() {
-      let search_term;
-      if (this.selected_country && this.selected_theme && this.selected_type) {
-        this.selected_country = this.selected_country.toLowerCase();
-        this.selected_theme = this.selected_theme.toLowerCase();
-        search_term = this.selected_country + ' ' + this.selected_type + ' ' + this.selected_theme;
-      } else if (this.selected_country) {
-        search_term = this.selected_country;
-        search_term = search_term.toLowerCase();
-      } else if (this.selected_theme) {
-        search_term = this.selected_theme;
-        search_term = search_term.toLowerCase();
+      if (this.startDate && this.endDate) {
+        getNewsByTime(this.startDate, this.endDate)
+            .then((response) => {
+              // console.log(response.data);
+              this.newItems = response.data.data;
+              console.log(this.newItems)
+              // this.$emit('update:items', this.newItems);
+            })
       } else {
-        search_term = this.search;
+        let search_term;
+        if (this.selected_country && this.selected_theme && this.selected_type) {
+          this.selected_country = this.selected_country.toLowerCase();
+          this.selected_theme = this.selected_theme.toLowerCase();
+          search_term = this.selected_country + ' ' + this.selected_type + ' ' + this.selected_theme;
+        } else if (this.selected_country) {
+          search_term = this.selected_country;
+          search_term = search_term.toLowerCase();
+        } else if (this.selected_theme) {
+          search_term = this.selected_theme;
+          search_term = search_term.toLowerCase();
+        } else {
+          search_term = this.search;
+        }
+        this.getQuerySet(search_term, this.$props.pageNumb, this.$props.pageSize);
       }
-      this.getQuerySet(search_term);
+
     }
     ,
     toNews(url) {

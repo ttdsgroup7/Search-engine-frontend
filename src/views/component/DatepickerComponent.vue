@@ -15,6 +15,7 @@
           hide-details
           :value="dateValue"
           v-on="on"
+          clearable
           @focus="focusDate"
           @blur="blurDate"
       ></v-text-field>
@@ -48,14 +49,14 @@ export default {
         if (!this.dateMenu) {
           this.dateMenu = true;
         }
-      }, 200);
+      }, 1500);
     },
     blurDate() {
       setTimeout(() => {
         if (this.dateMenu) {
           this.dateMenu = false;
         }
-      }, 200);
+      }, 1500);
     }
   }
 };

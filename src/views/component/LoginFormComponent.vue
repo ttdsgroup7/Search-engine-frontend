@@ -86,10 +86,10 @@ export default {
         password: this.password,
         username: this.name,
       }).then((res) => {
-        // console.log(res);
+        console.log(res);
         // console.log(userPass);
 
-        if (res.code === '200') {
+        if (res.data.code === '200') {
           this.$store.commit('setUser', {
             username: this.name,
             password: userPass,
