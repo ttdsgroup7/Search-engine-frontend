@@ -162,7 +162,15 @@
 
 <script>
 
-import {getAllCountries, getAllTheme, getNewsByTheme, getNewsByTime, getSearch, getWordCorrection} from "@/api";
+import {
+  getAllCountries,
+  getAllTheme,
+  getNewsByCountry,
+  getNewsByTheme,
+  getNewsByTime,
+  getSearch,
+  getWordCorrection
+} from "@/api";
 import {forEach} from "core-js/internals/array-iteration";
 import DatepickerComponent from "@/views/component/DatepickerComponent";
 
@@ -210,23 +218,28 @@ export default {
         // console.log(selected);
         await getNewsByTheme(selected, this.$props.pageNumb, this.$props.pageSize)
             .then((response) => {
-              console.log(response.data)
+              // console.log(response.data)
               this.newItems = response.data.data;
               this.$emit('update:items', this.newItems);
               const searchQuery = JSON.parse((JSON.stringify(this.$route.query)));
-              searchQuery.search_phase = selected;
+              searchQuery.tab = selected;
               this.$router.push({query: searchQuery});
             })
+      } else if (this.$route.query.search_type) {
+        await this.getCountryQuery(this.$route.query.search_phase, this.$props.pageNumb, this.$props.pageSize)
       } else {
         // console.log(this.$route.query);
         await this.getQuerySet(this.$route.query.search_phase, this.$props.pageNumb, this.$props.pageSize);
       }
-    }
-    ,
+    },
     async pageNumb(val) {
-      await this.getQuerySet(this.$route.query.search_phase, val, this.$props.pageSize);
-    }
-    ,
+      if (this.$route.query.search_type) {
+        await this.getCountryQuery(this.$route.query.search_phase, val, this.$props.pageSize)
+      } else {
+        console.log(this.$route.query);
+        await this.getQuerySet(this.$route.query.search_phase, val, this.$props.pageSize);
+      }
+    },
     async search(term) {
       if (this.newItems.length < 0 || this.newItems.length == null) {
         //console.log(term);
@@ -250,8 +263,15 @@ export default {
   }
   ,
   async beforeMount() {
-    //console.log(this.$route.query.search_phase);
-    await this.getQuerySet(this.$route.query.search_phase, this.$props.pageNumb, this.$props.pageSize);
+    console.log(this.$route.query.search_type);
+    if (this.$route.query.search_type) {
+      console.log('country detected');
+      await this.getCountryQuery(this.$route.query.search_phase, this.$props.pageNumb, this.$props.pageSize)
+    } else {
+      console.log('country not detected');
+      await this.getQuerySet(this.$route.query.search_phase, this.$props.pageNumb, this.$props.pageSize);
+    }
+
 
     await getAllCountries().then(res => {
       forEach(res.data.data, (item) => {
@@ -315,9 +335,19 @@ export default {
         } else if (this.selected_country) {
           search_term = this.selected_country;
           search_term = search_term.toLowerCase();
+          this.getCountryQuery(search_term, this.$props.pageNumb, this.$props.pageSize);
         } else if (this.selected_theme) {
           search_term = this.selected_theme;
           search_term = search_term.toLowerCase();
+          getNewsByTheme(search_term, this.$props.pageNumb, this.$props.pageSize)
+              .then((response) => {
+                // console.log(response.data)
+                this.newItems = response.data.data;
+                this.$emit('update:items', this.newItems);
+                const searchQuery = JSON.parse((JSON.stringify(this.$route.query)));
+                searchQuery.search_phase = search_term;
+                this.$router.push({query: searchQuery});
+              })
         } else {
           search_term = this.search;
         }
@@ -338,8 +368,17 @@ export default {
     ,
     capitalizeFirstLetter(string) {
       return string.charAt(0).toUpperCase() + string.slice(1);
-    }
-    ,
+    },
+    getCountryQuery(term, pageNumb, pageSize) {
+      getNewsByCountry(term, pageNumb, pageSize).then((response) => {
+        console.log(response.data);
+        this.newItems = response.data.data;
+        this.$emit('update:items', this.newItems);
+        const searchQuery = JSON.parse((JSON.stringify(this.$route.query)));
+        searchQuery.search_phase = term;
+        this.$router.push({query: searchQuery});
+      })
+    },
     getQuerySet(term, pageNumb, pageSize) {
       getSearch(term, pageNumb, pageSize)
           .then((response) => {

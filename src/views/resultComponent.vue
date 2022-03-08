@@ -78,7 +78,7 @@
               prev-icon="mdi-menu-left"
           ></v-pagination>
         </v-col>
-        <v-overlay :value="showRating">
+        <v-overlay :value="showRating" v-if="this.$store.state.isLogin">
           <v-card class="white"
                   outlined
           >
@@ -187,7 +187,7 @@ export default {
     getItems(item) {
       // console.log(item);
       this.items = item.list;
-      this.totalPages = item.navigatePages;
+      this.totalPages = item.navigateLastPage;
     },
     capitalizeFirstLetter(string) {
       return string.charAt(0).toUpperCase() + string.slice(1);
