@@ -117,10 +117,13 @@
             </v-card-actions>
           </v-card>
         </v-overlay>
-        <div>
+        <v-col
+            cols="6"
+            md="4"
+        >
           <related-reading-component v-if="this.$store.state.isLogin !== false"></related-reading-component>
           <p v-else> You have to login to load your recommendations!</p>
-        </div>
+        </v-col>
       </v-row>
     </v-container>
   </div>
