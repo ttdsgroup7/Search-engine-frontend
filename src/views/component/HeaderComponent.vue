@@ -319,12 +319,12 @@ export default {
     ,
     searchTerm() {
       if (this.startDate && this.endDate) {
-        getNewsByTime(this.startDate, this.endDate)
+        getNewsByTime(this.startDate, this.endDate, this.$props.pageNumb, this.$props.pageSize)
             .then((response) => {
               // console.log(response.data);
               this.newItems = response.data.data;
               console.log(this.newItems)
-              // this.$emit('update:items', this.newItems);
+              this.$emit('update:items', this.newItems);
             })
       } else {
         let search_term;

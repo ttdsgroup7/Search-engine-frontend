@@ -190,7 +190,7 @@ export default {
     getItems(item) {
       // console.log(item);
       this.items = item.list;
-      this.totalPages = item.navigateLastPage;
+      this.totalPages = item.pages;
     },
     capitalizeFirstLetter(string) {
       return string.charAt(0).toUpperCase() + string.slice(1);

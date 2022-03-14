@@ -49,14 +49,14 @@ export default {
         if (!this.dateMenu) {
           this.dateMenu = true;
         }
-      }, 1500);
+      }, 1000);
     },
     blurDate() {
       setTimeout(() => {
         if (this.dateMenu) {
           this.dateMenu = false;
         }
-      }, 1500);
+      }, 1000);
     }
   }
 };

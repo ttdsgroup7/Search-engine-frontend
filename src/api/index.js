@@ -37,8 +37,8 @@ export const getNewsByCountry = (params, pageNum, pageSize) => {
     return axios.get(host_1 + `/search/newsbycountry?country=${params}&page=${pageNum}&pagesize=${pageSize}`)
 }
 
-export const getNewsByTime = (startTime, endTime) => {
-    return axios.get(host_1 + `/search/newsbytime?starttime=${startTime}&endtime=${endTime}`);
+export const getNewsByTime = (startTime, endTime, pageNum, pageSize) => {
+    return axios.get(host_1 + `/search/newsbytime?starttime=${startTime}&endtime=${endTime}&page=${pageNum}&pagesize=${pageSize}`);
 }
 
 export const getWordCorrection = (param) => {
